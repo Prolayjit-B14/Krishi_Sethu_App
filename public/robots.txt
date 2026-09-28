@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /mqtt-config
+
+Sitemap: https://krishisethu.in/sitemap.xml

@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "agri-sense-pb"
+  },
+  "targets": {
+    "agri-sense-pb": {
+      "hosting": {
+        "agri-sense-pb": [
+          "agri-sense-pb"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

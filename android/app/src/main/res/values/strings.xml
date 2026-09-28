@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Krishi Sethu</string>
+    <string name="title_activity_main">Krishi Sethu</string>
+    <string name="package_name">com.agrisense.app</string>
+    <string name="custom_url_scheme">com.agrisense.app</string>
+    <string name="google_login_client_id">981404446811-4ckmk5q4phlsv32l5fk4ll4jki09om0t.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">981404446811-4ckmk5q4phlsv32l5fk4ll4jki09om0t.apps.googleusercontent.com</string>
+</resources>
+
+

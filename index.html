@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Krishi Sethu — Smart Precision Agriculture & IoT Platform</title>
+    
+    <!-- 🌾 SEO & Open Graph Metadata -->
+    <meta name="description" content="Krishi Sethu is an IoT-enabled smart precision agriculture platform providing real-time soil telemetry, NPK sensing, micro-climate monitoring, automated actuator control, and agronomic AI decision-support for farmers in India." />
+    <meta name="author" content="Prolayjit Biswas (SemiColon Team)" />
+    <meta name="theme-color" content="#15803D" />
+    <meta name="jurisdiction" content="India (Digital Personal Data Protection Act, 2023)" />
+
+    <!-- 🌐 Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Krishi Sethu — Smart Precision Agriculture & IoT Monitoring" />
+    <meta property="og:description" content="Real-time soil moisture, NPK telemetry, micro-climate station, automated actuator controls, and crop health analytics." />
+    <meta property="og:image" content="/favicon.svg" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- 🐦 Twitter / X -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Krishi Sethu — Smart Agriculture Platform" />
+    <meta name="twitter:description" content="Real-time IoT soil telemetry and agronomic decision-support platform." />
+    <meta name="twitter:image" content="/favicon.svg" />
+    
+    <!-- 🏗️ CRITICAL CSS: Injected here to prevent white-screen while JS loads -->
+    <link rel="stylesheet" href="/src/theme/index.css">
+
+    <style>
+      #app-diag-loader {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+        background: #020617; display: flex; flex-direction: column;
+        align-items: center; justifyContent: center; z-index: 9999;
+        font-family: system-ui, -apple-system, sans-serif; color: white;
+      }
+      .diag-spinner {
+        width: 40px; height: 40px; border: 3px solid rgba(16, 185, 129, 0.2);
+        border-top-color: #10b981; border-radius: 50%;
+        animation: diag-spin 1s linear infinite; margin-bottom: 20px;
+      }
+      @keyframes diag-spin { to { transform: rotate(360deg); } }
+      #app-diag-error { display: none; color: #fca5a5; text-align: center; padding: 20px; max-width: 300px; }
+    </style>
+
+    <script>
+      window.global = window;
+      window.process = { env: { DEBUG: undefined }, nextTick: (cb) => setTimeout(cb, 0) };
+      
+      let bootTimer = null;
+      window.hideAppLoader = () => {
+        if (bootTimer) {
+          clearTimeout(bootTimer);
+          bootTimer = null;
+        }
+        const loader = document.getElementById('app-diag-loader');
+        if (loader) {
+          loader.style.display = 'none';
+          if (loader.parentNode) loader.parentNode.removeChild(loader);
+        }
+      };
+
+      // 🕵️ EMERGENCY FAIL-SAFE: Show error if React doesn't mount
+      window.addEventListener('load', () => {
+        bootTimer = setTimeout(() => {
+          const root = document.getElementById('root');
+          if (root && (!root.innerHTML || root.innerHTML.trim() === "")) {
+            const spinner = document.getElementById('app-diag-spinner');
+            const error = document.getElementById('app-diag-error');
+            if (spinner) spinner.style.display = 'none';
+            if (error) error.style.display = 'block';
+            console.error("🚨 [DIAGNOSTIC]: React mount timeout reached.");
+          }
+        }, 15000);
+      });
+    </script>
+  </head>
+  <body>
+    <div id="app-diag-loader">
+      <div id="app-diag-spinner" class="diag-spinner"></div>
+      <div id="app-diag-error">
+        <h2 style="margin-bottom: 10px;">Boot Failed</h2>
+        <p style="font-size: 0.8rem; opacity: 0.8;">The application engine failed to initialize. Please check your connection or restart the app.</p>
+        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #10b981; border: none; color: white; border-radius: 8px; font-weight: bold;">RETRY BOOT</button>
+      </div>
+    </div>
+
+    <div id="root"></div>
+    
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
