@@ -230,6 +230,8 @@ const AgriBot = () => {
                     {[
                       { icon: Activity, l: "System Health", q: "Analyze entire system health" },
                       { icon: Zap, l: "Optimization", q: "Strategic yield improvement plan" },
+                      { icon: Globe, l: "Land Survey & RoR", q: "Explain modern drone and DGPS land surveys and cadastral mapping" },
+                      { icon: Shield, l: "Cooperative & PMFBY", q: "Explain PACS cooperative services, by-laws, and PMFBY insurance" },
                       { icon: History, l: "Data Trends", q: "Show me recent sensor anomalies" },
                       { icon: Settings, l: "Actuators", q: "Quick actuator status check" }
                     ].map(s => (

@@ -87,8 +87,77 @@ const localAgriLogic = (prompt, context) => {
     return `🌍 REGIONAL SUITABILITY:\n- ${suitability || 'Local climate synchronized'}\n\nAdvice: Consult local agronomic recommendations for micro-climate matching.`;
   }
 
-  // 6. General Knowledge Fallback
-  return "I'm currently analyzing your data using my Local Diagnostic Engine. I can help with 'status', 'irrigation', 'pests', 'NPK', or 'suitability'! To enable the full Cloud AI Brain, ensure your Gemini API key is active. 🌿";
+  // 6. Technology-Driven Land Survey, Cadastral Mapping & Digital Land Governance
+  if (
+    query.includes('survey') || 
+    query.includes('cadastral') || 
+    query.includes('ror') || 
+    query.includes('land') || 
+    query.includes('boundary') || 
+    query.includes('dgps') || 
+    query.includes('rtk') || 
+    query.includes('drone') || 
+    query.includes('mutation') || 
+    query.includes('encroachment') || 
+    query.includes('dispute') ||
+    query.includes('cors')
+  ) {
+    return `### 🗺️ LAND SURVEY & CADASTRAL RESURVEY INTELLIGENCE
+
+**1. Historical Background & Core Challenges:**
+- Rural land surveys historically relied on legacy **chain and tape methods**, dating back decades or the colonial era.
+- **Critical Problems Emerged**:
+  * Unrecorded land transactions & informal partitions due to inheritance.
+  * Inaccurate/outdated cadastral maps and discrepancies between textual **Record of Rights (RoR)** and spatial maps.
+  * Boundary encroachments, overlapping claims, and missing mutation entries.
+  * These issues fuel **prolonged civil litigation** (accounting for a major share of Indian court disputes) and impede agricultural investment and precision farming.
+
+**2. Modern Technology-Driven Survey Solution:**
+- **Drone Aerial Surveys & Photogrammetry**: High-resolution Ortho-Rectified Imagery (ORI) capturing millimeter-accurate parcel boundaries.
+- **Differential GPS (DGPS) & Real-Time Kinematic (RTK)**: Sub-centimeter ground-truth positioning.
+- **CORS Networks (Continuously Operating Reference Stations)**: National geo-spatial framework for high-precision real-time positioning.
+- **GIS Cadastral Mapping & Remote Sensing**: Dynamic geo-referenced parcel identification layers over satellite imagery.
+- **Mobile-Based Field Verification**: Fast on-site validation by survey officers and land owners.
+
+**3. Unified Digital Land Information System:**
+- Seamlessly integrates **Record of Rights (RoR)**, **Mutation registers**, **Deed registration databases**, **Survey maps**, and **Ownership history**.
+- Attaches verified, tamper-proof **Geo-Coordinates** to every agricultural plot to guarantee transparent land governance, unlock credit access, and power automated precision agriculture.`;
+  }
+
+  // 7. Cooperative Governance, PACS, PMFBY & Rural Member Guidance
+  if (
+    query.includes('cooperative') || 
+    query.includes('pacs') || 
+    query.includes('pmfby') || 
+    query.includes('insurance') || 
+    query.includes('scheme') || 
+    query.includes('grievance') || 
+    query.includes('by-law') || 
+    query.includes('bylaw') || 
+    query.includes('ministry of cooperation') || 
+    query.includes('financial literacy')
+  ) {
+    return `### 🏛️ COOPERATIVE GOVERNANCE & RURAL SCHEMES ADVISORY
+
+**1. Challenge & Mission:**
+- Rural stakeholders, farmers, and cooperative members often face severe language barriers and bureaucratic friction regarding cooperative laws, scheme access, and grievance resolution.
+- KrishiSethu AI provides **instant multilingual, voice-enabled conversational guidance** for equitable rural empowerment.
+
+**2. Core Advisory Services Available:**
+- **Cooperative Laws & By-Laws**: Clear explanations of member rights, voting protocols, audit compliance, and election rules under State and Multi-State Cooperative Societies Acts.
+- **PACS (Primary Agricultural Credit Societies)**: Guidance on computerization benefits, low-interest short-term agricultural credit, digitized input distribution (seeds/fertilizers), and modern storage/custom hiring centers.
+- **PMFBY (Pradhan Mantri Fasal Bima Yojana)**:
+  * Eligibility check and crop insurance premium calculations (1.5% Rabi, 2% Kharif, 5% Commercial/Horticultural).
+  * Step-by-step 72-hour localized calamity loss intimation protocol and claim filing instructions.
+- **Ministry of Cooperation Schemes**: Central sector initiatives, cooperative grain storage programs, FPO conversions, and cooperative dairy/fisheries convergence.
+- **Financial Literacy**: Guidance on Kisan Credit Card (KCC), interest subvention benefits, prompt repayment incentives, and digital payment adoption.
+- **Grievance Redressal Mechanism**: Direct escalation protocols, drafting assistance for filing petitions with the Cooperative Registrar / Ombudsman.
+
+*Voice-enabled assistance (STT/TTS) is active across English, Hindi, and Bengali for seamless rural accessibility.*`;
+  }
+
+  // 8. General Knowledge Fallback
+  return "I'm currently analyzing your data using my Local Diagnostic Engine. I can help with 'status', 'irrigation', 'pests', 'NPK', 'suitability', 'land survey & cadastral mapping', or 'cooperative laws & PMFBY'! To enable the full Cloud AI Brain, ensure your Gemini API key is active. 🌿";
 };
 
 /**
@@ -100,12 +169,6 @@ export const askGemini = async (prompt, context) => {
     return localAgriLogic(prompt, context);
   }
 
-  const models = [
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
-    "gemini-pro"
-  ];
-
   const slimContext = {
     sensors: context.currentSensors,
     weather: context.weather,
@@ -115,19 +178,34 @@ export const askGemini = async (prompt, context) => {
   };
 
   const fullPrompt = `
-You are AgriSense AI, an elite agronomy assistant. 
-Data Context:
-- Farm: ${context.farmName}
+You are KrishiSethu AI (AgriSense Pro), an elite context-aware precision agronomy and rural intelligence assistant for Indian agriculture.
+
+DOMAIN KNOWLEDGE BASE:
+1. PRECISION AGRONOMY & SENSOR TELEMETRY:
+- Farm: ${context.farmName} (${context.location})
 - Sensors: ${JSON.stringify(slimContext.sensors)}
 - Weather: ${JSON.stringify(slimContext.weather)}
 - System: ${JSON.stringify(slimContext.health)}
 - History: ${JSON.stringify(slimContext.logs)}
 
+2. TECHNOLOGY-DRIVEN LAND SURVEY, CADASTRAL MAPPING & DIGITAL LAND GOVERNANCE:
+- Background: Historically, land surveys in rural India were conducted using conventional chain and tape methods dating back decades or the colonial period.
+- Problems: Boundary changes due to inheritance and informal partition, unrecorded land transactions, encroachments, overlapping claims, errors in cadastral maps, mismatch between textual Record of Rights (RoR) and spatial maps, absence of updated mutation records, and inconsistent land classifications. These cause prolonged civil litigation, reduced agricultural productivity, and administrative delays.
+- Modern Solution: Drone-based aerial mapping, RTK-GPS (Real-Time Kinematic), DGPS (Differential GPS), CORS (Continuously Operating Reference Stations), GIS cadastral mapping, satellite imagery, and mobile-based field verification.
+- Unified Digital Land Information System: Integration of Record of Rights (RoR), mutation records, registration databases, survey maps, ownership history, and precise geo-coordinates enabling real-time verification and updating.
+
+3. COOPERATIVE GOVERNANCE, RURAL ADVISORY & FINANCIAL LITERACY:
+- Problem: Cooperative members, farmers, and rural stakeholders often lack awareness regarding cooperative laws, government schemes, PACS services, crop insurance schemes (PMFBY), financial literacy, and grievance redressal mechanisms due to language barriers and limited guidance.
+- Multilingual Voice & Chatbot Capabilities: Natural Language Processing with Speech-to-Text and Text-to-Speech support across Indian languages (English, Hindi, Bengali).
+- Cooperative Guidance: Guidance on cooperative laws, by-laws, Ministry of Cooperation schemes and services, PACS modernization, PMFBY (Pradhan Mantri Fasal Bima Yojana) claim filing and localized calamity support, financial literacy (KCC, interest subvention), and cooperative grievance redressal.
+- Mode: Software + Hardware hybrid ecosystem (IoT sensors + Web/Mobile + AI).
+
 Instructions:
-1. Provide a professional, concise response.
-2. Use markdown for structure (h3 for sections).
-3. Be action-oriented. If sensors are bad, suggest fixes.
-4. If asked about status, summarize all sensors.
+1. Provide an authoritative, structured, and action-oriented response formatted cleanly in markdown (use h3 for headings, bullet points, bold key terms).
+2. If asked about field sensors or farm status, summarize live telemetry and suggest fixes.
+3. If asked about land surveys, cadastral maps, RoR, boundaries, drone mapping, or land disputes, provide comprehensive domain-grounded guidance based on the modern survey technologies above.
+4. If asked about cooperative governance, PACS, PMFBY, agricultural subsidies, by-laws, or financial literacy, provide clear, step-by-step guidance in accessible, farmer-friendly language.
+5. Support multilingual queries with cultural and linguistic naturalness.
 
 User: ${prompt}
 `;
