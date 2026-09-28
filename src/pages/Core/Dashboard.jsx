@@ -14,7 +14,9 @@ import {
   ChevronRight, ChevronDown, ShieldCheck, RefreshCw,
   BellRing, Lightbulb, ArrowUp, ArrowDown,
   CheckCircle, BarChart3, Zap, Activity, Monitor,
-  Volume2, VolumeX, Check, Sparkles, Leaf
+  Volume2, VolumeX, Check, Sparkles, Leaf,
+  Bot, CloudRain, ShieldAlert, Cpu, Server,
+  Layers, FileText, TrendingUp
 } from 'lucide-react';
 
 // Context & State
@@ -142,61 +144,18 @@ const CardWave = ({ fill, stroke }) => (
   </div>
 );
 
-// ─── 1. UNIFIED FARMER COMMAND & SUMMARY CARD ───────────────────────────────
+// ─── 1. FARMER WELCOME HEADER CARD ───────────────────────────────
 const UnifiedFarmerHeroCard = React.memo(({
   user,
   currentGPS,
   isDarkMode,
   onSync,
   isSyncing,
-  plots,
-  activePlot,
-  activePlotId,
-  onSwitchPlot,
-  isPlotDropdownOpen,
-  setIsPlotDropdownOpen,
-  decision,
-  liveAiAdvisory,
-  aiFieldSummary,
-  isGeneratingAi,
-  advisoryLang,
-  onLanguageChange,
-  isSpeaking,
-  onSpeakAdvisory,
-  devices,
-  sensorData,
-  pipelineState = 'idle',
-  statusMessage = '',
 }) => {
   const [time] = useState(new Date());
   const h = time.getHours();
   const greeting = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : h < 21 ? 'Good Evening' : 'Good Night';
   const firstName = (user?.name || user?.email || 'Farmer').split(' ')[0].split('@')[0];
-
-  // Node telemetry count calculation
-  const calculatedActive = devices
-    ? Object.values(devices).filter(d => d?.status === 'ACTIVE' || d?.status === 'PARTIAL').length
-    : 0;
-  const isMoistureOnline = sensorData?.soil?.moisture != null && !isNaN(sensorData?.soil?.moisture);
-  const onlineNodes = calculatedActive > 0 ? calculatedActive : (isMoistureOnline ? 4 : 3);
-
-  // Plot taxonomy & stage display
-  const cropDisplay = activePlot?.crop
-    ? (activePlot.crop.toLowerCase() === 'paddy' ? 'Rice' : (activePlot.crop.charAt(0).toUpperCase() + activePlot.crop.slice(1).toLowerCase()))
-    : 'Rice';
-  const acreageDisplay = `${activePlot?.acreage || 2} acres`;
-  const stageDisplay = decision?.lifecycle?.activeStage?.sub
-    || decision?.lifecycle?.activeStage?.shortName
-    || decision?.lifecycle?.activeStage?.title
-    || decision?.lifecycle?.activeStage?.name
-    || 'Tillering';
-
-  // Dynamic AI Agricultural Summary Text (respects selected language)
-  const currentSummaryText = aiFieldSummary?.assessment?.[advisoryLang]
-    || liveAiAdvisory?.voiceScripts?.[advisoryLang]
-    || liveAiAdvisory?.body
-    || decision?.advisory?.body
-    || "Soil moisture data isn't being received right now. AI advice will resume when the node reconnects.";
 
   return (
     <motion.div
@@ -252,7 +211,6 @@ const UnifiedFarmerHeroCard = React.memo(({
           justifyContent: 'space-between',
           alignItems: 'center',
           gap: 12,
-          marginBottom: 14,
         }}
       >
         {/* Location (Lucide SVG, NO emoji) */}
@@ -299,417 +257,6 @@ const UnifiedFarmerHeroCard = React.memo(({
           </motion.div>
           <span>Refresh / sync</span>
         </motion.button>
-      </div>
-
-      {/* ── 1. PLOT SELECTION CARD (Compact, clean SVG icons, no emoji) ── */}
-      <div style={{ position: 'relative', marginBottom: 12, zIndex: 25 }}>
-        <div
-          onClick={() => setIsPlotDropdownOpen(!isPlotDropdownOpen)}
-          style={{
-            background: isDarkMode ? 'rgba(0, 0, 0, 0.35)' : '#FFFFFF',
-            border: isDarkMode ? '1.5px solid rgba(34, 197, 94, 0.3)' : '1.5px solid #C4EAD0',
-            borderRadius: 16,
-            padding: '10px 14px',
-            boxShadow: isDarkMode
-              ? '0 4px 16px rgba(0, 0, 0, 0.25)'
-              : '0 2px 10px rgba(21, 128, 61, 0.05)',
-            cursor: 'pointer',
-            transition: 'all 0.18s ease',
-          }}
-        >
-          {/* Row 1: Sprout SVG + Plot Name + Chevron */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <Sprout size={16} color={isDarkMode ? '#86EFAC' : '#15803D'} strokeWidth={2.2} />
-              <span
-                style={{
-                  fontSize: '0.90rem',
-                  fontWeight: 800,
-                  color: isDarkMode ? '#F8FAFC' : '#0F172A',
-                }}
-              >
-                {activePlot?.name || 'Plot A — North Field'}
-              </span>
-            </div>
-            <ChevronDown
-              size={16}
-              color={isDarkMode ? '#94A3B8' : '#64748B'}
-              style={{
-                transform: isPlotDropdownOpen ? 'rotate(180deg)' : 'none',
-                transition: 'transform 0.2s ease',
-              }}
-            />
-          </div>
-
-          {/* Row 2: Compact Meta Line (Crop • Acreage • Stage • Online Nodes) */}
-          <div
-            style={{
-              paddingLeft: 23,
-              fontSize: '0.74rem',
-              fontWeight: 600,
-              color: isDarkMode ? '#94A3B8' : '#64748B',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              flexWrap: 'wrap',
-            }}
-          >
-            <span style={{ color: isDarkMode ? '#86EFAC' : '#15803D', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              <Leaf size={12} strokeWidth={2.2} />
-              {cropDisplay} • {acreageDisplay} • {stageDisplay}
-            </span>
-            <span style={{ color: isDarkMode ? '#475569' : '#CBD5E1' }}>•</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  background: onlineNodes >= 3 ? '#22C55E' : (onlineNodes > 0 ? '#F59E0B' : '#EF4444'),
-                  boxShadow: onlineNodes >= 3 ? '0 0 6px rgba(34, 197, 94, 0.6)' : 'none',
-                }}
-              />
-              <span>{onlineNodes}/4 nodes</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Animated Plot Switcher Dropdown */}
-        <AnimatePresence>
-          {isPlotDropdownOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -6, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.98 }}
-              transition={{ duration: 0.18 }}
-              style={{
-                position: 'absolute',
-                top: '105%',
-                left: 0,
-                right: 0,
-                background: isDarkMode ? '#111827' : '#FFFFFF',
-                borderRadius: 16,
-                border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #C4EAD0',
-                boxShadow: '0 12px 32px rgba(0, 0, 0, 0.22)',
-                padding: '6px',
-                zIndex: 40,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 4
-              }}
-            >
-              <div style={{
-                padding: '4px 10px 6px',
-                fontSize: '0.64rem',
-                fontWeight: 800,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: isDarkMode ? '#94A3B8' : '#64748B'
-              }}>
-                Select Active Farm Plot
-              </div>
-              {plots && plots.map(p => (
-                <div
-                  key={p.id}
-                  onClick={() => {
-                    onSwitchPlot(p.id);
-                    setIsPlotDropdownOpen(false);
-                  }}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: 12,
-                    background: activePlotId === p.id
-                      ? (isDarkMode ? 'rgba(34, 197, 94, 0.2)' : '#DCFCE7')
-                      : 'transparent',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    transition: 'background 0.12s ease'
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 800, color: isDarkMode ? '#F8FAFC' : '#0F172A' }}>
-                      {p.name}
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: isDarkMode ? '#94A3B8' : '#64748B', marginTop: 1 }}>
-                      {p.crop.toUpperCase()} • {p.acreage} Acres
-                    </div>
-                  </div>
-                  {activePlotId === p.id && <Check size={16} color="#15803D" strokeWidth={2.5} />}
-                </div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* ── 2. AI FIELD SUMMARY CARD ── */}
-      <div
-        style={{
-          background: isDarkMode ? 'rgba(0, 0, 0, 0.35)' : '#FFFFFF',
-          border: isDarkMode ? '1.5px solid rgba(34, 197, 94, 0.25)' : '1.5px solid #C4EAD0',
-          borderRadius: 18,
-          padding: '14px 16px 14px',
-          boxShadow: isDarkMode
-            ? '0 4px 20px rgba(0, 0, 0, 0.25)'
-            : '0 2px 12px rgba(21, 128, 61, 0.05)',
-        }}
-      >
-        {/* Header Row: Clean "FIELD SUMMARY" (No extra live badge per user request) */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span
-            style={{
-              fontSize: '0.72rem',
-              fontWeight: 900,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: isDarkMode ? '#4ADE80' : '#15803D',
-            }}
-          >
-            FIELD SUMMARY
-          </span>
-        </div>
-
-        {/* Status Line: Clean SVG glowing dot indicator (NO emoji) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-          <span
-            style={{
-              display: 'inline-block',
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              background: isMoistureOnline ? '#22C55E' : '#EF4444',
-              boxShadow: isMoistureOnline
-                ? '0 0 8px rgba(34, 197, 94, 0.7)'
-                : '0 0 8px rgba(239, 68, 68, 0.7)',
-            }}
-          />
-          <span
-            style={{
-              fontSize: '0.78rem',
-              fontWeight: 800,
-              color: isMoistureOnline ? (isDarkMode ? '#4ADE80' : '#15803D') : '#EF4444',
-            }}
-          >
-            {isMoistureOnline ? 'Telemetry online' : 'Telemetry offline'}
-          </span>
-        </div>
-
-        {/* Body Text */}
-        <p
-          style={{
-            margin: '0 0 8px 0',
-            fontSize: '0.84rem',
-            fontWeight: 600,
-            color: isDarkMode ? '#E2E8F0' : '#334155',
-            lineHeight: 1.48,
-          }}
-        >
-          {isMoistureOnline
-            ? currentSummaryText
-            : "Soil moisture data isn't being received right now. AI advice will resume when the node reconnects."}
-        </p>
-
-        {/* Missing / Limitations Notice if present */}
-        {aiFieldSummary?.missingDataNotes && isMoistureOnline && (
-          <div
-            style={{
-              fontSize: '0.72rem',
-              color: isDarkMode ? '#94A3B8' : '#64748B',
-              marginBottom: 10,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              fontStyle: 'italic',
-            }}
-          >
-            <span style={{ fontSize: '0.8rem' }}>ℹ️</span>
-            <span>{aiFieldSummary.missingDataNotes}</span>
-          </div>
-        )}
-
-        {/* ── PROGRESS STATUS BADGE (4 Progressive States) ── */}
-        {['collecting', 'analyzing', 'synthesizing'].includes(pipelineState) && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '7px 12px',
-              borderRadius: 10,
-              background: isDarkMode ? 'rgba(34, 197, 94, 0.12)' : '#F0FDF4',
-              border: isDarkMode ? '1px solid rgba(34, 197, 94, 0.25)' : '1px solid #BBF7D0',
-              marginBottom: 10,
-            }}
-          >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              style={{ display: 'flex', color: '#15803D' }}
-            >
-              <RefreshCw size={13} />
-            </motion.div>
-            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#15803D' }}>
-              {statusMessage || (
-                pipelineState === 'collecting' ? 'Collecting field data...' :
-                pipelineState === 'analyzing' ? 'Analysing field conditions...' :
-                'Preparing voice summary...'
-              )}
-            </span>
-          </motion.div>
-        )}
-
-        {/* Footer Row: Language Selector (left) + Audio Controls (right) */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 8,
-            paddingTop: 8,
-            borderTop: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #E2E8F0',
-            flexWrap: 'wrap',
-          }}
-        >
-          {/* Language Selector: [ English ] [ বাংলা ] [ हिन्दी ] */}
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 2,
-              background: isDarkMode ? 'rgba(255, 255, 255, 0.06)' : '#F1F5F9',
-              padding: 3,
-              borderRadius: 10,
-              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #E2E8F0',
-            }}
-          >
-            {[
-              { id: 'en', label: 'English' },
-              { id: 'bn', label: 'বাংলা' },
-              { id: 'hi', label: 'हिन्दी' }
-            ].map(l => (
-              <button
-                key={l.id}
-                onClick={() => onLanguageChange(l.id)}
-                style={{
-                  border: 'none',
-                  background: advisoryLang === l.id ? '#15803D' : 'transparent',
-                  color: advisoryLang === l.id ? '#FFFFFF' : (isDarkMode ? '#94A3B8' : '#64748B'),
-                  fontSize: '0.70rem',
-                  fontWeight: 800,
-                  padding: '4px 9px',
-                  borderRadius: 7,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                {l.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Audio Controls: ▶ Play / ⏸ Pause + ↻ Regenerate */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {/* Main AI Voice Summary / Play / Pause Button */}
-            <motion.button
-              whileTap={{ scale: 0.94 }}
-              onClick={() => onSpeakAdvisory(false)}
-              disabled={['collecting', 'analyzing', 'synthesizing'].includes(pipelineState)}
-              style={{
-                padding: '6px 14px',
-                borderRadius: 12,
-                border: 'none',
-                background: pipelineState === 'playing'
-                  ? '#DC2626'
-                  : (['collecting', 'analyzing', 'synthesizing'].includes(pipelineState) ? (isDarkMode ? '#334155' : '#CBD5E1') : '#15803D'),
-                color: '#FFFFFF',
-                fontSize: '0.74rem',
-                fontWeight: 800,
-                cursor: ['collecting', 'analyzing', 'synthesizing'].includes(pipelineState) ? 'wait' : 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                boxShadow: pipelineState === 'playing'
-                  ? '0 2px 12px rgba(220, 38, 38, 0.4)'
-                  : '0 2px 10px rgba(21, 128, 61, 0.28)',
-                flexShrink: 0,
-              }}
-            >
-              {pipelineState === 'playing' ? (
-                <>
-                  <Pause size={14} />
-                  <span>Pause</span>
-                  {/* Mini animated equalizer */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 2, height: 10, marginLeft: 2 }}>
-                    {[0.5, 1, 0.7, 0.4].map((scale, i) => (
-                      <motion.span
-                        key={i}
-                        animate={{ scaleY: [0.3, scale, 0.3] }}
-                        transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.12 }}
-                        style={{
-                          width: 2,
-                          height: '100%',
-                          background: '#FFFFFF',
-                          borderRadius: 1,
-                          display: 'inline-block'
-                        }}
-                      />
-                    ))}
-                  </div>
-                </>
-              ) : pipelineState === 'paused' ? (
-                <>
-                  <Play size={14} />
-                  <span>Resume</span>
-                </>
-              ) : ['collecting', 'analyzing', 'synthesizing'].includes(pipelineState) ? (
-                <>
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                    style={{ display: 'flex' }}
-                  >
-                    <RefreshCw size={13} />
-                  </motion.div>
-                  <span>{pipelineState === 'collecting' ? 'Collecting...' : (pipelineState === 'analyzing' ? 'Analysing...' : 'Preparing...')}</span>
-                </>
-              ) : (
-                <>
-                  <Volume2 size={14} />
-                  <span>🔊 AI Voice Summary</span>
-                </>
-              )}
-            </motion.button>
-
-            {/* Regenerate Button */}
-            <motion.button
-              whileTap={{ scale: 0.94 }}
-              onClick={() => onSpeakAdvisory(true)}
-              disabled={['collecting', 'analyzing', 'synthesizing'].includes(pipelineState)}
-              style={{
-                padding: '6px 9px',
-                borderRadius: 12,
-                border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #CBD5E1',
-                background: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
-                color: isDarkMode ? '#CBD5E1' : '#475569',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                cursor: ['collecting', 'analyzing', 'synthesizing'].includes(pipelineState) ? 'wait' : 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 4
-              }}
-              title="Re-analyze and regenerate voice summary"
-            >
-              <RefreshCw size={12} />
-              <span>↻</span>
-            </motion.button>
-          </div>
-        </div>
       </div>
     </motion.div>
   );
@@ -1450,210 +997,404 @@ const ControlsCard = React.memo(({ actuators, toggleActuator, ACTUATORS, isDarkM
   );
 });
 
-// ─── 5. ACTIONABLE FARM INTELLIGENCE CARD & DETAILED ANALYTICS CTA ───────────
-const InsightsCard = React.memo(({ sensorData, sensorHistory, navigate, isDarkMode }) => {
-  const activeInsights = useMemo(() => {
-    const list = [];
-    if (!sensorData || !sensorHistory || sensorHistory.length < 1) {
-      return [
-        { text: 'Awaiting live telemetry stream from field nodes...', icon: Activity, color: '#0284C7', bg: '#E0F2FE' }
-      ];
-    }
 
-    const currM = sensorData.soil?.moisture;
-    const pastM = sensorHistory[0]?.soil?.moisture;
-    if (currM != null) {
-      const diff = pastM != null ? currM - pastM : 0;
-      let text = `Soil Moisture: ${Number(currM).toFixed(0)}% (Field Zone A)`;
-      if (Math.abs(diff) >= 1) {
-        text = diff < 0 ? `Moisture decreased by ${Math.abs(diff).toFixed(0)}%` : `Moisture increased by ${diff.toFixed(0)}%`;
-      }
-      list.push({
-        text,
-        icon: diff < 0 ? ArrowDown : (diff > 0 ? ArrowUp : Sprout),
-        color: diff < 0 ? '#0284C7' : '#15803D',
-        bg: diff < 0 ? '#E0F2FE' : '#DCFCE7'
-      });
-    }
+// ─── 6. QUICK ACTION HUB (4 COMPACT FEATURE SHORTCUTS) ──────────────────────────
 
-    const currT = sensorData.weather?.temp;
-    const pastT = sensorHistory[0]?.weather?.temp;
-    if (currT != null) {
-      const diff = pastT != null ? currT - pastT : 0;
-      let text = `Ambient Temp: ${currT.toFixed(1)}°C (Stable)`;
-      if (Math.abs(diff) >= 0.2) {
-        text = diff > 0 ? `Temp rose by ${diff.toFixed(1)}°C` : `Temp fell by ${Math.abs(diff).toFixed(1)}°C`;
-      }
-      list.push({
-        text,
-        icon: diff > 0 ? ArrowUp : ArrowDown,
-        color: diff > 0 ? '#EA580C' : '#0284C7',
-        bg: diff > 0 ? '#FFEDD5' : '#E0F2FE'
-      });
-    }
+const QuickActionHub = React.memo(({ navigate, isDarkMode }) => {
+  const actions = [
+    {
+      id: 'ai',
+      title: 'Krishi AI',
+      subtitle: 'Ask Assistant',
+      path: '/krishisethu-ai',
+      icon: Bot,
+      color: '#10B981',
+      bg: isDarkMode ? 'rgba(16, 185, 129, 0.15)' : '#DCFCE7',
+      border: isDarkMode ? 'rgba(16, 185, 129, 0.3)' : '#BBF7D0',
+    },
+    {
+      id: 'advisor',
+      title: 'Crop Advisor',
+      subtitle: 'Disease & Stage',
+      path: '/crop-advisor',
+      icon: Sparkles,
+      color: '#F59E0B',
+      bg: isDarkMode ? 'rgba(245, 158, 11, 0.15)' : '#FEF3C7',
+      border: isDarkMode ? 'rgba(245, 158, 11, 0.3)' : '#FDE68A',
+    },
 
-    const isDry = currM != null && currM < 35;
-    const isRaining = sensorData.weather?.rainLevel > 0;
+    {
+      id: 'irrigation',
+      title: 'Irrigation Hub',
+      subtitle: 'Drip & Actuators',
+      path: '/actuators',
+      icon: Droplets,
+      color: '#3B82F6',
+      bg: isDarkMode ? 'rgba(59, 130, 246, 0.15)' : '#DBEAFE',
+      border: isDarkMode ? 'rgba(59, 130, 246, 0.3)' : '#BFDBFE',
+    },
+    {
+      id: 'analytics',
+      title: 'Reports',
+      subtitle: 'Analytics & Graphs',
+      path: '/analytics',
+      icon: BarChart3,
+      color: '#8B5CF6',
+      bg: isDarkMode ? 'rgba(139, 92, 246, 0.15)' : '#F3E8FF',
+      border: isDarkMode ? 'rgba(139, 92, 246, 0.3)' : '#E9D5FF',
+    },
+  ];
 
-    let recText = 'Crop conditions optimal for current phenological phase';
-    let recIcon = CheckCircle;
-    let recColor = '#15803D';
-    let recBg = '#DCFCE7';
 
-    if (isRaining) {
-      recText = 'Precipitation detected: Irrigation cycle safely paused';
-      recIcon = Droplets;
-      recColor = '#0284C7';
-      recBg = '#E0F2FE';
-    } else if (isDry) {
-      recText = 'Attention: Low moisture detected, recommend drip cycle';
-      recIcon = BellRing;
-      recColor = '#D97706';
-      recBg = '#FEF3C7';
-    }
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+        {actions.map((act) => {
+          const Icon = act.icon;
+          return (
+            <motion.div
+              key={act.id}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => navigate(act.path)}
+              style={{
+                background: isDarkMode ? 'var(--bg-card)' : '#FFFFFF',
+                borderRadius: 18,
+                padding: '12px 14px',
+                border: isDarkMode ? '1px solid var(--border-main)' : '1px solid rgba(0, 0, 0, 0.05)',
+                boxShadow: isDarkMode ? '0 2px 8px rgba(0, 0, 0, 0.25)' : '0 2px 8px rgba(0, 0, 0, 0.03)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 12,
+                  background: act.bg,
+                  border: `1px solid ${act.border}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Icon size={19} color={act.color} strokeWidth={2.2} />
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{
+                  fontSize: '0.84rem',
+                  fontWeight: 800,
+                  color: isDarkMode ? '#F8FAFC' : '#0F172A',
+                  letterSpacing: '-0.01em',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {act.title}
+                </div>
+                <div style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  color: isDarkMode ? '#94A3B8' : '#64748B',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  marginTop: 1,
+                }}>
+                  {act.subtitle}
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
 
-    list.push({ text: recText, icon: recIcon, color: recColor, bg: recBg });
-    return list.slice(0, 3);
-  }, [sensorData, sensorHistory]);
+// ─── 7. ACTIVE CROP & PHENOLOGY STAGE CARD ──────────────────────────────────────
+const ActiveCropStageCard = React.memo(({ activePlot, farmInfo, decision, navigate, isDarkMode }) => {
+  const cropRaw = activePlot?.crop || farmInfo?.crop || 'Paddy (Rice)';
+  const cropFormatted = cropRaw.charAt(0).toUpperCase() + cropRaw.slice(1);
+  const stageName = decision?.lifecycle?.activeStage?.name || 'Vegetative Stage';
+  const daysElapsed = decision?.lifecycle?.daysElapsed || 32;
+  const totalDays = decision?.lifecycle?.totalDays || 120;
+  const progressPercent = Math.min(100, Math.round((daysElapsed / totalDays) * 100)) || 27;
+
+  const acreage = activePlot?.acreage || farmInfo?.acreage || '2.0';
+  const waterSaved = decision?.percentSaved != null ? `${decision.percentSaved}%` : '34%';
+  const targetMoisture = decision?.adaptiveThresholds?.idealMoisture
+    ? `${decision.adaptiveThresholds.idealMoisture.min}–${decision.adaptiveThresholds.idealMoisture.max}%`
+    : '40–70%';
 
   return (
     <motion.div
       variants={fadeUp}
       initial="hidden"
       animate="visible"
-      custom={4}
+      custom={1}
+      whileTap={{ scale: 0.985 }}
+      onClick={() => navigate('/crop-advisor')}
       style={{
         background: isDarkMode ? 'var(--bg-card)' : '#FFFFFF',
         borderRadius: 22,
-        padding: '18px 18px 16px',
+        padding: '16px 18px',
         border: isDarkMode ? '1px solid var(--border-main)' : '1px solid rgba(0, 0, 0, 0.05)',
         boxShadow: isDarkMode ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 10px rgba(0, 0, 0, 0.03)',
         marginBottom: 16,
+        cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+      <CardWave
+        fill={isDarkMode ? 'rgba(34, 197, 94, 0.07)' : 'rgba(34, 197, 94, 0.04)'}
+        stroke={isDarkMode ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.08)'}
+      />
+
+      <div style={{ position: 'relative', zIndex: 2 }}>
+        {/* Header Row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 12,
+                background: isDarkMode ? 'rgba(34, 197, 94, 0.18)' : '#DCFCE7',
+                border: isDarkMode ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid #BBF7D0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#15803D',
+              }}
+            >
+              <Sprout size={18} strokeWidth={2.4} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: '0.96rem',
+                    fontWeight: 800,
+                    color: isDarkMode ? '#F8FAFC' : '#0F172A',
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {cropFormatted}
+                </h3>
+                <span
+                  style={{
+                    fontSize: '0.66rem',
+                    fontWeight: 700,
+                    background: isDarkMode ? 'rgba(34, 197, 94, 0.2)' : '#DCFCE7',
+                    color: isDarkMode ? '#4ADE80' : '#15803D',
+                    padding: '2px 7px',
+                    borderRadius: 8,
+                  }}
+                >
+                  Active Crop
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <span
+            style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              color: isDarkMode ? '#94A3B8' : '#64748B',
+            }}
+          >
+            Day {daysElapsed} of {totalDays}
+          </span>
+        </div>
+
+        {/* Progress Bar Row */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ fontSize: '0.76rem', fontWeight: 700, color: isDarkMode ? '#CBD5E1' : '#334155' }}>
+              {stageName}
+            </span>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: isDarkMode ? '#4ADE80' : '#15803D' }}>
+              {progressPercent}% Cycle
+            </span>
+          </div>
+          <div
+            style={{
+              width: '100%',
+              height: 6,
+              borderRadius: 6,
+              background: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : '#E2E8F0',
+              overflow: 'hidden',
+            }}
+          >
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ duration: 1.0, ease: 'easeOut' }}
+              style={{
+                height: '100%',
+                borderRadius: 6,
+                background: 'linear-gradient(90deg, #15803D, #22C55E)',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* 3 Quick Micro Metrics */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+          <div
+            style={{
+              padding: '7px 8px',
+              borderRadius: 12,
+              background: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : '#F8FAF7',
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.03)',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: '0.60rem', fontWeight: 700, color: '#94A3B8', letterSpacing: '0.04em' }}>
+              TARGET MOISTURE
+            </div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: isDarkMode ? '#F8FAFC' : '#0F172A', marginTop: 2 }}>
+              {targetMoisture}
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: '7px 8px',
+              borderRadius: 12,
+              background: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : '#F8FAF7',
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.03)',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: '0.60rem', fontWeight: 700, color: '#94A3B8', letterSpacing: '0.04em' }}>
+              WATER SAVED
+            </div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#10B981', marginTop: 2 }}>
+              {waterSaved}
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: '7px 8px',
+              borderRadius: 12,
+              background: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : '#F8FAF7',
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.03)',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: '0.60rem', fontWeight: 700, color: '#94A3B8', letterSpacing: '0.04em' }}>
+              PLOT ACREAGE
+            </div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: isDarkMode ? '#F8FAFC' : '#0F172A', marginTop: 2 }}>
+              {acreage} Ac
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+});
+
+// ─── 8. (removed) ───────────────────────────────────────────────────────────────
+const FieldAdvisoryBanner = null && React.memo(({ decision, navigate, isDarkMode }) => {
+  const isWarning = decision?.severity === 'warning';
+  const isOffline = decision?.severity === 'offline';
+  const title = decision?.advisoryTitle || 'Field Conditions Optimal';
+  const action = decision?.actionItem || 'Soil moisture & temperature within target thresholds.';
+
+  const badgeColor = isOffline ? '#94A3B8' : (isWarning ? '#F59E0B' : '#10B981');
+  const badgeBg = isOffline
+    ? (isDarkMode ? 'rgba(148, 163, 184, 0.15)' : '#F1F5F9')
+    : (isWarning ? (isDarkMode ? 'rgba(245, 158, 11, 0.15)' : '#FEF3C7') : (isDarkMode ? 'rgba(16, 185, 129, 0.15)' : '#DCFCE7'));
+  const borderCol = isOffline
+    ? (isDarkMode ? 'rgba(148, 163, 184, 0.25)' : '#E2E8F0')
+    : (isWarning ? (isDarkMode ? 'rgba(245, 158, 11, 0.25)' : '#FDE68A') : (isDarkMode ? 'rgba(16, 185, 129, 0.25)' : '#BBF7D0'));
+
+  const Icon = isWarning ? BellRing : (isOffline ? Activity : CheckCircle);
+
+  return (
+    <motion.div
+      variants={fadeUp}
+      initial="hidden"
+      animate="visible"
+      custom={2}
+      whileTap={{ scale: 0.985 }}
+      onClick={() => navigate('/crop-advisor')}
+      style={{
+        background: isDarkMode ? 'var(--bg-card)' : '#FFFFFF',
+        borderRadius: 18,
+        padding: '12px 14px',
+        border: `1px solid ${borderCol}`,
+        boxShadow: isDarkMode ? '0 2px 8px rgba(0, 0, 0, 0.25)' : '0 2px 8px rgba(0, 0, 0, 0.03)',
+        marginBottom: 16,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        cursor: 'pointer',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
         <div
           style={{
             width: 34,
             height: 34,
-            borderRadius: 12,
-            background: isDarkMode ? 'rgba(34, 197, 94, 0.18)' : '#DCFCE7',
-            border: isDarkMode ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid #BBF7D0',
+            borderRadius: 10,
+            background: badgeBg,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#15803D',
+            flexShrink: 0,
           }}
         >
-          <BarChart3 size={18} strokeWidth={2.4} />
+          <Icon size={17} color={badgeColor} strokeWidth={2.4} />
         </div>
-        <h3
-          style={{
-            margin: 0,
-            fontSize: '0.98rem',
-            fontWeight: 800,
-            color: isDarkMode ? '#F8FAFC' : '#0F172A',
-            letterSpacing: '-0.01em',
-          }}
-        >
-          Actionable Intelligence
-        </h3>
-      </div>
-
-      {/* Insight Items */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-        {activeInsights.map((item, i) => (
+        <div style={{ minWidth: 0 }}>
           <div
-            key={i}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              padding: '8px 10px',
-              borderRadius: 14,
-              background: isDarkMode ? 'rgba(255, 255, 255, 0.02)' : '#F8FAF7',
-              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.03)',
+              fontSize: '0.84rem',
+              fontWeight: 800,
+              color: isDarkMode ? '#F8FAFC' : '#0F172A',
+              letterSpacing: '-0.01em',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}
           >
-            <div
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: 10,
-                background: item.bg,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <item.icon size={15} color={item.color} strokeWidth={2.4} />
-            </div>
-            <span
-              style={{
-                fontSize: '0.80rem',
-                fontWeight: 600,
-                color: isDarkMode ? '#F8FAFC' : '#0F172A',
-                lineHeight: 1.3,
-              }}
-            >
-              {item.text}
-            </span>
+            {title}
           </div>
-        ))}
+          <div
+            style={{
+              fontSize: '0.72rem',
+              fontWeight: 500,
+              color: isDarkMode ? '#CBD5E1' : '#64748B',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              marginTop: 1,
+            }}
+          >
+            {action}
+          </div>
+        </div>
       </div>
 
-      {/* Signature Botanical CTA Button matching Soil Monitor */}
-      <motion.button
-        whileTap={{ scale: 0.98 }}
-        onClick={() => navigate('/reports')}
-        style={{
-          width: '100%',
-          background: 'linear-gradient(135deg, #15803D 0%, #166534 100%)',
-          color: '#FFFFFF',
-          border: 'none',
-          padding: '16px 24px',
-          borderRadius: 20,
-          fontWeight: 800,
-          fontSize: '0.86rem',
-          letterSpacing: '0.06em',
-          textTransform: 'uppercase',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 10,
-          fontFamily: 'inherit',
-          boxShadow: '0 8px 22px rgba(21, 128, 61, 0.32)',
-          position: 'relative',
-          overflow: 'hidden',
-          minHeight: 52,
-        }}
-      >
-        {/* Subtle Botanical Leaf Accent in Right Corner of Button */}
-        <svg
-          style={{
-            position: 'absolute',
-            right: 12,
-            bottom: -6,
-            width: '60px',
-            height: '60px',
-            opacity: 0.26,
-            pointerEvents: 'none',
-          }}
-          viewBox="0 0 64 64"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M32 55 C45 35, 60 20, 64 5 C50 15, 38 30, 32 55 Z" fill="#FFFFFF" />
-          <path d="M32 55 C22 40, 10 28, 0 20 C14 26, 24 38, 32 55 Z" fill="#FFFFFF" opacity="0.8" />
-        </svg>
-
-        <BarChart3 size={18} strokeWidth={2.4} color="#FFFFFF" />
-        <span>DETAILED ANALYTICS & REPORTS</span>
-        <ChevronRight size={18} strokeWidth={2.4} color="#FFFFFF" />
-      </motion.button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: isDarkMode ? '#4ADE80' : '#15803D' }}>
+          Advisor
+        </span>
+        <ChevronRight size={13} strokeWidth={2.4} color={isDarkMode ? '#4ADE80' : '#15803D'} />
+      </div>
     </motion.div>
   );
 });
@@ -1668,27 +1409,6 @@ const Dashboard = () => {
   const { sensorData, farmHealthScore, systemHealth, devices, sensorHistory, mqttStatus } = useTelemetry();
 
   const [isSyncing, setIsSyncing] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [pipelineState, setPipelineState] = useState('idle');
-  const [statusMessage, setStatusMessage] = useState('');
-  const [advisoryLang, setAdvisoryLang] = useState('bn'); // Default Bengali for Krishnanagar / WB context
-  const [isPlotDropdownOpen, setIsPlotDropdownOpen] = useState(false);
-  const [liveAiAdvisory, setLiveAiAdvisory] = useState(null);
-  const [aiFieldSummary, setAiFieldSummary] = useState(null);
-  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
-
-  useEffect(() => {
-    return speechService.subscribe((speaking, payload) => {
-      setIsSpeaking(speaking);
-      if (payload) {
-        setPipelineState(payload.state || (speaking ? 'playing' : 'idle'));
-        setStatusMessage(payload.message || '');
-        if (payload.summary) {
-          setAiFieldSummary(payload.summary);
-        }
-      }
-    });
-  }, []);
 
   // 🧠 CENTRAL DECISION ENGINE: Synchronizes active plot, sensors, phenology, and advisories
   const decision = useMemo(() => {
@@ -1699,75 +1419,10 @@ const Dashboard = () => {
     });
   }, [activePlot, sensorData, sensorHistory]);
 
-  // 🤖 REAL-TIME GEMINI AI ADVISORY & REASONING:
-  useEffect(() => {
-    let cancelled = false;
-
-    // 1. Classical Advisory Engine
-    generateRealtimeCropAdvisory({
-      crop: activePlot?.crop || 'paddy',
-      stage: decision?.lifecycle?.activeStage?.name || 'Vegetative',
-      soil: sensorData?.soil,
-      weather: sensorData?.weather,
-      lang: 'en'
-    }).then(res => {
-      if (!cancelled && res) {
-        setLiveAiAdvisory(res);
-      }
-    });
-
-    // 2. Holistic KrishiSethu Context Collection & Agricultural Reasoning
-    const assembled = AIContextService.assembleLiveAppContext({
-      appContext: { user, farmInfo, currentGPS, activePlot, actuators },
-      telemetryContext: { sensorData, sensorHistory, devices, mqttStatus, systemHealth, farmHealthScore },
-      farmAdvisorBrain: decision
-    });
-
-    generateHolisticFieldSummary({ context: assembled, targetLang: advisoryLang })
-      .then(summary => {
-        if (!cancelled && summary) {
-          setAiFieldSummary(summary);
-        }
-      })
-      .catch(err => console.warn('[Dashboard] Holistic reasoning notice:', err));
-
-    return () => { cancelled = true; };
-  }, [activePlot?.crop, decision?.lifecycle?.activeStage?.name, sensorData?.soil?.moisture, sensorData?.weather?.temp, actuators]);
-
   const handleSync = () => {
     setIsSyncing(true);
     syncData();
     setTimeout(() => setIsSyncing(false), 1200);
-  };
-
-  const handleSpeakAdvisory = async (forceRefresh = false) => {
-    if (isSpeaking && !forceRefresh) {
-      speechService.pause();
-      return;
-    }
-
-    if (pipelineState === 'paused' && !forceRefresh) {
-      speechService.resume();
-      return;
-    }
-
-    setIsGeneratingAi(true);
-    try {
-      const res = await speechService.runAiVoicePipeline({
-        appContext: { user, farmInfo, currentGPS, activePlot, actuators },
-        telemetryContext: { sensorData, sensorHistory, devices, mqttStatus, systemHealth, farmHealthScore },
-        farmAdvisorBrain: decision,
-        lang: advisoryLang,
-        forceRefresh
-      });
-      if (res?.summary) {
-        setAiFieldSummary(res.summary);
-      }
-    } catch (err) {
-      console.warn("AI Voice Pipeline notice:", err);
-    } finally {
-      setIsGeneratingAi(false);
-    }
   };
 
   return (
@@ -1779,34 +1434,13 @@ const Dashboard = () => {
         fontFamily: "'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
-      {/* 1. Unified Farmer Command, Plot Selection & Speech-to-Talk Summary Card */}
+      {/* 1. Farmer Command & Welcome Header */}
       <UnifiedFarmerHeroCard
         user={user}
         currentGPS={currentGPS}
         isDarkMode={isDarkMode}
         onSync={handleSync}
         isSyncing={isSyncing}
-        plots={plots}
-        activePlot={activePlot}
-        activePlotId={activePlotId}
-        onSwitchPlot={switchPlot}
-        isPlotDropdownOpen={isPlotDropdownOpen}
-        setIsPlotDropdownOpen={setIsPlotDropdownOpen}
-        decision={decision}
-        liveAiAdvisory={liveAiAdvisory}
-        aiFieldSummary={aiFieldSummary}
-        isGeneratingAi={isGeneratingAi}
-        advisoryLang={advisoryLang}
-        onLanguageChange={(langId) => {
-          setAdvisoryLang(langId);
-          if (isSpeaking) speechService.stop();
-        }}
-        isSpeaking={isSpeaking}
-        onSpeakAdvisory={handleSpeakAdvisory}
-        devices={devices}
-        sensorData={sensorData}
-        pipelineState={pipelineState}
-        statusMessage={statusMessage}
       />
 
       {/* 2. Botanical Hero Card (Farm Health Index) */}
@@ -1818,7 +1452,18 @@ const Dashboard = () => {
         isDarkMode={isDarkMode}
       />
 
-      {/* 3. Live Telemetry Module Cards (Soil Health & Weather Health) */}
+
+
+      {/* 4. Active Crop & Growth Stage Card */}
+      <ActiveCropStageCard
+        activePlot={activePlot}
+        farmInfo={farmInfo}
+        decision={decision}
+        navigate={navigate}
+        isDarkMode={isDarkMode}
+      />
+
+      {/* 5. Live Telemetry Module Cards (Soil Health & Weather Health) */}
       <TelemetryModuleCards
         sensorData={sensorData}
         systemHealth={systemHealth}
@@ -1827,7 +1472,123 @@ const Dashboard = () => {
         isDarkMode={isDarkMode}
       />
 
-      {/* 4. Quick Actuator Controls */}
+      {/* ── SECTION A: Hardware & IoT ── */}
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={2} style={{
+        marginBottom: 16,
+        background: isDarkMode ? 'var(--bg-card)' : '#FFFFFF',
+        borderRadius: 22,
+        padding: '14px',
+        border: isDarkMode ? '1px solid var(--border-main)' : '1px solid rgba(0,0,0,0.05)',
+        boxShadow: isDarkMode ? '0 2px 8px rgba(0,0,0,0.25)' : '0 2px 10px rgba(0,0,0,0.03)',
+      }}>
+        <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: isDarkMode ? '#94A3B8' : '#64748B', marginBottom: 12 }}>Hardware &amp; IoT</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+
+          {/* Device Manager */}
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/device-area')}
+            style={{
+              background: isDarkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC',
+              borderRadius: 14, padding: '14px', cursor: 'pointer',
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.04)',
+              display: 'flex', flexDirection: 'column', gap: 10,
+            }}
+          >
+            <div style={{
+              width: 38, height: 38, borderRadius: 12,
+              background: isDarkMode ? 'rgba(13,148,136,0.18)' : '#CCFBF1',
+              border: isDarkMode ? '1px solid rgba(13,148,136,0.35)' : '1px solid #99F6E4',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Cpu size={19} color="#0D9488" strokeWidth={2.2} />
+            </div>
+            <div style={{ fontSize: '0.84rem', fontWeight: 800, color: isDarkMode ? '#F8FAFC' : '#0F172A', letterSpacing: '-0.01em' }}>Device Manager</div>
+          </motion.div>
+
+          {/* Sensor Manager */}
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/sensor-details')}
+            style={{
+              background: isDarkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC',
+              borderRadius: 14, padding: '14px', cursor: 'pointer',
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.04)',
+              display: 'flex', flexDirection: 'column', gap: 10,
+            }}
+          >
+            <div style={{
+              width: 38, height: 38, borderRadius: 12,
+              background: isDarkMode ? 'rgba(21,128,61,0.18)' : '#DCFCE7',
+              border: isDarkMode ? '1px solid rgba(21,128,61,0.35)' : '1px solid #BBF7D0',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Layers size={19} color="#15803D" strokeWidth={2.2} />
+            </div>
+            <div style={{ fontSize: '0.84rem', fontWeight: 800, color: isDarkMode ? '#F8FAFC' : '#0F172A', letterSpacing: '-0.01em' }}>Sensor Manager</div>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* ── SECTION B: Reports & Analytics ── */}
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={3} style={{
+        marginBottom: 16,
+        background: isDarkMode ? 'var(--bg-card)' : '#FFFFFF',
+        borderRadius: 22,
+        padding: '14px',
+        border: isDarkMode ? '1px solid var(--border-main)' : '1px solid rgba(0,0,0,0.05)',
+        boxShadow: isDarkMode ? '0 2px 8px rgba(0,0,0,0.25)' : '0 2px 10px rgba(0,0,0,0.03)',
+      }}>
+        <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: isDarkMode ? '#94A3B8' : '#64748B', marginBottom: 12 }}>Reports &amp; Analytics</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+
+          {/* Report Generator */}
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/reports')}
+            style={{
+              background: isDarkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC',
+              borderRadius: 14, padding: '14px', cursor: 'pointer',
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.04)',
+              display: 'flex', flexDirection: 'column', gap: 10,
+            }}
+          >
+            <div style={{
+              width: 38, height: 38, borderRadius: 12,
+              background: isDarkMode ? 'rgba(245,158,11,0.18)' : '#FEF3C7',
+              border: isDarkMode ? '1px solid rgba(245,158,11,0.35)' : '1px solid #FDE68A',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <FileText size={19} color="#D97706" strokeWidth={2.2} />
+            </div>
+            <div style={{ fontSize: '0.84rem', fontWeight: 800, color: isDarkMode ? '#F8FAFC' : '#0F172A', letterSpacing: '-0.01em' }}>Report Generator</div>
+          </motion.div>
+
+          {/* Graph Analyzer */}
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/analytics')}
+            style={{
+              background: isDarkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC',
+              borderRadius: 14, padding: '14px', cursor: 'pointer',
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.04)',
+              display: 'flex', flexDirection: 'column', gap: 10,
+            }}
+          >
+            <div style={{
+              width: 38, height: 38, borderRadius: 12,
+              background: isDarkMode ? 'rgba(139,92,246,0.18)' : '#F3E8FF',
+              border: isDarkMode ? '1px solid rgba(139,92,246,0.35)' : '1px solid #E9D5FF',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <TrendingUp size={19} color="#7C3AED" strokeWidth={2.2} />
+            </div>
+            <div style={{ fontSize: '0.84rem', fontWeight: 800, color: isDarkMode ? '#F8FAFC' : '#0F172A', letterSpacing: '-0.01em' }}>Graph Analyzer</div>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* 7. Quick Actuator Controls */}
       <ControlsCard
         actuators={actuators}
         toggleActuator={toggleActuator}
@@ -1836,13 +1597,7 @@ const Dashboard = () => {
         navigate={navigate}
       />
 
-      {/* 5. Actionable Farm Intelligence & Detailed Reports CTA */}
-      <InsightsCard
-        sensorData={sensorData}
-        sensorHistory={sensorHistory}
-        navigate={navigate}
-        isDarkMode={isDarkMode}
-      />
+
 
       {/* Footer */}
       <footer style={{ textAlign: 'center', marginTop: 12, paddingBottom: 10 }}>

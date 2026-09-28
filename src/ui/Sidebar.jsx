@@ -8,7 +8,8 @@ import {
   Sprout, Waves, FileText, ShieldCheck,
   ChevronLeft, ChevronRight, Leaf, User, PieChart, LayoutDashboard,
   ArrowRight, ArrowLeft, Activity, Cpu, LogOut, Droplets,
-  AlertCircle, Wrench, Sliders, Scan, Layers, TrendingUp, ShieldAlert
+  AlertCircle, Wrench, Sliders, Scan, Layers, TrendingUp, ShieldAlert,
+  Bot
 } from 'lucide-react';
 import { useApp } from '../state/AppContext';
 import { useTelemetry } from '../state/TelemetryContext';
@@ -25,25 +26,30 @@ const Sidebar = () => {
 
   const navSections = [
     {
-      title: 'Core Monitoring',
+      title: 'Monitoring',
+
       links: [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, color: 'var(--primary)' },
         { name: 'Soil Monitor', path: '/soil-monitoring', icon: Sprout, color: 'var(--primary)' },
         { name: 'Weather Station', path: '/weather', icon: CloudSun, color: 'var(--accent)' },
-        { name: 'Disaster Risk Radar', path: '/climate-risk-radar', icon: ShieldAlert, color: '#DC2626' },
         { name: 'Irrigation Control', path: '/irrigation', icon: Droplets, color: '#0284C7' }
       ]
     },
     {
-      title: 'Smart Agronomy',
+      title: 'Advisor',
+
       links: [
+        { name: 'Krishi AI', path: '/krishisethu-ai', icon: Bot, color: '#10B981' },
+
         { name: 'Farm Advisor', path: '/crop-advisor', icon: Sparkles, color: 'var(--accent)' },
-        { name: 'Pest Management', path: '/pest-management', icon: ShieldCheck, color: '#10B981' },
-        { name: 'Soil Forensics', path: '/precision-soil-testing', icon: FlaskConical, color: 'var(--primary)' }
+
+        { name: 'Soil Test', path: '/precision-soil-testing', icon: FlaskConical, color: 'var(--primary)' }
+
       ]
     },
     {
-      title: 'Hardware & IoT Control',
+      title: 'Control',
+
       links: [
         { name: 'Sensor Manager', path: '/sensor-details', icon: Layers, color: '#15803D' },
         { name: 'Device Manager', path: '/device-area', icon: Cpu, color: 'var(--secondary)' },
@@ -54,7 +60,6 @@ const Sidebar = () => {
       title: 'Insights',
       links: [
         { name: 'Analytics Hub', path: '/analytics', icon: PieChart, color: 'var(--secondary)' },
-        { name: 'Yield & Water Forecast', path: '/yield-water-analytics', icon: TrendingUp, color: '#10B981' },
         { name: 'Farm Reports', path: '/reports', icon: FileText, color: 'var(--primary)' },
         { name: 'Alerts', path: '/alerts', icon: Bell, color: 'var(--accent)' },
         { name: 'My Account', path: '/account', icon: User, color: 'var(--primary)' },

@@ -1510,13 +1510,6 @@ const Login = () => {
             >
               Terms of Service
             </span>
-            <span>•</span>
-            <span 
-              onClick={() => navigate('/cookie-policy')} 
-              style={{ color: '#15803D', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
-            >
-              Cookie Policy
-            </span>
           </div>
           <div>
             Krishi Sethu • Developed by Prolayjit Biswas (SemiColon Team), India. All Rights Reserved.
@@ -1608,7 +1601,7 @@ const Login = () => {
                     <p><strong>1. Acceptance:</strong> By accessing Krishi Sethu, you receive access to IoT telemetry, automated irrigation actuator controls, and agronomic decision-support tools.</p>
                     <p><strong>2. Physical IoT Actuator Safety:</strong> Automated or remote actuator commands (pumps, valves, sprayers) control high-voltage physical equipment. You must maintain local physical disconnects and verify field conditions.</p>
                     <p><strong>3. Advisory Nature:</strong> Krishi Sethu provides data-driven decision support, not certified crop insurance or guaranteed agronomic guarantees. Consult qualified Krishi Vigyan Kendras (KVKs).</p>
-                    <p><strong>4. Security & Access:</strong> You are responsible for safeguarding your credentials and reporting unauthorized telemetry access.</p>
+                    <p><strong>4. Security and Access:</strong> You are responsible for safeguarding your credentials and reporting unauthorized telemetry access.</p>
                   </>
                 ) : (
                   <>

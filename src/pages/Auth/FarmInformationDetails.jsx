@@ -3,8 +3,9 @@ import ReactDOM from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Check, ChevronDown,
-  Building2, Globe, MapPin, Maximize2, Layers, Sun
+  Building2, Globe, MapPin, Maximize2, Layers, Sun, Sprout
 } from "lucide-react";
+import { useApp } from "../../state/AppContext";
 
 /* ─── Compact Colorful Lucide Icon Badge (matching Farm Information title style) ─── */
 const iconBadge = (isDarkMode, color, darkBg, lightBg, lightBorder) => ({
@@ -131,7 +132,14 @@ const CustomSelect = ({ value, onChange, options, placeholder = "Select...", isD
               onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = isDarkMode ? "rgba(255,255,255,0.06)" : "#F8FAFC"; }}
               onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isSelected ? (isDarkMode ? "rgba(16,185,129,0.15)" : "#F0FDF4") : "transparent"; }}
             >
-              <span>{lbl}</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <span>{lbl}</span>
+                {opt.sub && (
+                  <span style={{ fontSize: "0.72rem", color: isDarkMode ? "#94A3B8" : "#64748B", fontWeight: 500 }}>
+                    {opt.sub}
+                  </span>
+                )}
+              </div>
               {isSelected && <Check size={14} strokeWidth={2.8} style={{ marginLeft: 8, flexShrink: 0 }} />}
             </button>
           );
@@ -249,7 +257,7 @@ const FarmInformationDetails = ({
   isSaving,
   saveSuccess,
 }) => {
-
+  const { plots, activePlotId, switchPlot } = useApp();
   const set = (key, val) => setFarmProfile(p => ({ ...p, [key]: val }));
 
   return (
@@ -286,6 +294,29 @@ const FarmInformationDetails = ({
           </span>
           <input type="text" placeholder="Farm name" value={farmProfile.name || ""}
             onChange={e => set("name", e.target.value)} style={rowInput(isDarkMode)} />
+        </div>
+
+        <div style={divider(isDarkMode)} />
+
+        {/* Farm Plot Selector */}
+        <div style={rowStyle}>
+          <span style={rowLabel(isDarkMode)}>
+            <div style={iconBadge(isDarkMode, "#10B981", "rgba(16,185,129,0.15)", "#ECFDF5", "#A7F3D0")}>
+              <Sprout size={15} color={isDarkMode ? "#34D399" : "#059669"} strokeWidth={2.2} />
+            </div>
+            Farm Plot
+          </span>
+          <CustomSelect
+            value={activePlotId || (plots?.[0]?.id ?? "plotA")}
+            onChange={v => switchPlot && switchPlot(v)}
+            options={(plots || []).map(p => ({
+              value: p.id,
+              label: p.name,
+              sub: `${(p.crop || 'Rice').toUpperCase()} • ${p.acreage || 2} Acres`
+            }))}
+            placeholder="Select Plot..."
+            isDarkMode={isDarkMode}
+          />
         </div>
 
         <div style={divider(isDarkMode)} />

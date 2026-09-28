@@ -1338,47 +1338,38 @@ const FarmAdvisor = () => {
 
                 {/* Right side: Speech Audio Icon + Language Toggle + Match Status Pill */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {/* Language Toggle Pill: [ EN | বাংলা | हिंदी ] */}
-                  <div
+                  {/* Single Language Toggle Button: Click to cycle EN -> বাংলা -> हिंदी */}
+                  <motion.button
+                    whileTap={{ scale: 0.92 }}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const nextLang = speechLang === 'en' ? 'bn' : speechLang === 'bn' ? 'hi' : 'en';
+                      setSpeechLang(nextLang);
+                      if (isSpeaking) speechService.stop();
+                    }}
+                    title="Click to switch language (EN / বাংলা / हिंदी)"
                     style={{
+                      height: 32,
+                      padding: '0 11px',
+                      borderRadius: 10,
+                      border: isDarkMode ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid #C4EAD0',
+                      background: isDarkMode ? 'rgba(34, 197, 94, 0.16)' : '#DCFCE7',
+                      color: isDarkMode ? '#86EFAC' : '#15803D',
+                      fontSize: '0.74rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      background: isDarkMode ? 'rgba(255, 255, 255, 0.06)' : '#F1F5F9',
-                      padding: 2,
-                      borderRadius: 100,
-                      border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E2E8F0',
+                      justifyContent: 'center',
+                      transition: 'all 0.15s ease',
+                      flexShrink: 0
                     }}
                   >
-                    {[
-                      { id: 'en', label: 'EN' },
-                      { id: 'bn', label: 'বাংলা' },
-                      { id: 'hi', label: 'हिंदी' }
-                    ].map(l => (
-                      <button
-                        key={l.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSpeechLang(l.id);
-                          if (isSpeaking) speechService.stop();
-                        }}
-                        style={{
-                          border: 'none',
-                          background: speechLang === l.id ? '#15803D' : 'transparent',
-                          color: speechLang === l.id ? '#FFFFFF' : (isDarkMode ? '#94A3B8' : '#64748B'),
-                          fontSize: '0.66rem',
-                          fontWeight: 800,
-                          padding: '3px 8px',
-                          borderRadius: 100,
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        {l.label}
-                      </button>
-                    ))}
-                  </div>
+                    <span>{speechLang === 'bn' ? 'বাংলা' : speechLang === 'hi' ? 'हिंदी' : 'EN'}</span>
+                  </motion.button>
 
-                  {/* AI Voice Summary / Controls */}
+                  {/* AI Voice Summary / Speaker Icon Only */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     <motion.button
                       whileTap={{ scale: 0.90 }}
@@ -1389,7 +1380,8 @@ const FarmAdvisor = () => {
                       }}
                       style={{
                         height: 32,
-                        padding: '0 12px',
+                        width: 32,
+                        padding: 0,
                         borderRadius: 10,
                         border: 'none',
                         background: pipelineState === 'playing'
@@ -1400,74 +1392,30 @@ const FarmAdvisor = () => {
                         color: '#FFFFFF',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 5,
+                        justifyContent: 'center',
                         cursor: ['collecting', 'analyzing', 'synthesizing'].includes(pipelineState) ? 'wait' : 'pointer',
                         boxShadow: pipelineState === 'playing'
                           ? '0 0 14px rgba(220, 38, 38, 0.4)'
                           : '0 2px 10px rgba(21, 128, 61, 0.3)',
-                        position: 'relative',
-                        fontSize: '0.68rem',
-                        fontWeight: 800,
                         flexShrink: 0
                       }}
-                      title="AI Voice Summary"
+                      title={pipelineState === 'playing' ? 'Pause' : pipelineState === 'paused' ? 'Resume' : 'Play Voice Advisory'}
                     >
                       {pipelineState === 'playing' ? (
-                        <>
-                          <Pause size={14} />
-                          <span>Pause</span>
-                        </>
+                        <Pause size={15} />
                       ) : pipelineState === 'paused' ? (
-                        <>
-                          <Play size={14} />
-                          <span>Resume</span>
-                        </>
+                        <Play size={15} />
                       ) : ['collecting', 'analyzing', 'synthesizing'].includes(pipelineState) ? (
-                        <>
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                            style={{ display: 'flex' }}
-                          >
-                            <RefreshCw size={13} />
-                          </motion.div>
-                          <span>
-                            {pipelineState === 'collecting' ? 'Collecting...' :
-                             pipelineState === 'analyzing' ? 'Analysing...' :
-                             'Preparing...'}
-                          </span>
-                        </>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                          style={{ display: 'flex' }}
+                        >
+                          <RefreshCw size={13} />
+                        </motion.div>
                       ) : (
-                        <>
-                          <Volume2 size={14} />
-                          <span>AI Voice Summary</span>
-                        </>
+                        <Volume2 size={16} />
                       )}
-                    </motion.button>
-
-                    {/* Regenerate Button */}
-                    <motion.button
-                      whileTap={{ scale: 0.90 }}
-                      disabled={['collecting', 'analyzing', 'synthesizing'].includes(pipelineState)}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleSpeak(true);
-                      }}
-                      style={{
-                        height: 32,
-                        padding: '0 8px',
-                        borderRadius: 10,
-                        border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #CBD5E1',
-                        background: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
-                        color: isDarkMode ? '#CBD5E1' : '#475569',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: ['collecting', 'analyzing', 'synthesizing'].includes(pipelineState) ? 'wait' : 'pointer'
-                      }}
-                      title="Regenerate Voice Summary"
-                    >
-                      <RefreshCw size={12} />
                     </motion.button>
                   </div>
 
@@ -1854,11 +1802,9 @@ const FarmAdvisor = () => {
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              overflowX: 'auto',
-              paddingBottom: 6,
+              width: '100%',
               marginBottom: 16,
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
+              boxSizing: 'border-box'
             }}
           >
             {[
@@ -1872,7 +1818,8 @@ const FarmAdvisor = () => {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveTab(t.id)}
                   style={{
-                    padding: '10px 18px',
+                    flex: 1,
+                    padding: '11px 12px',
                     borderRadius: 14,
                     background: isActive ? '#15803D' : (isDarkMode ? 'var(--bg-card)' : '#FFFFFF'),
                     color: isActive ? '#FFFFFF' : (isDarkMode ? '#94A3B8' : '#64748B'),
@@ -1880,13 +1827,13 @@ const FarmAdvisor = () => {
                     boxShadow: isActive ? '0 4px 14px rgba(21, 128, 61, 0.28)' : '0 2px 6px rgba(0, 0, 0, 0.02)',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: 7,
                     cursor: 'pointer',
                     fontFamily: 'inherit',
                     fontSize: '0.82rem',
                     fontWeight: 800,
                     whiteSpace: 'nowrap',
-                    flexShrink: 0,
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -1921,43 +1868,6 @@ const FarmAdvisor = () => {
                 fill={isDarkMode ? 'rgba(21, 128, 61, 0.08)' : 'rgba(21, 128, 61, 0.04)'}
                 stroke={isDarkMode ? 'rgba(21, 128, 61, 0.16)' : 'rgba(21, 128, 61, 0.09)'}
               />
-
-              {/* Section Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, position: 'relative', zIndex: 2 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div
-                    style={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: 12,
-                      background: isDarkMode ? 'rgba(34, 197, 94, 0.18)' : '#DCFCE7',
-                      border: isDarkMode ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid #BBF7D0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#15803D'
-                    }}
-                  >
-                    <Activity size={18} strokeWidth={2.4} />
-                  </div>
-                  <div>
-                    <h3
-                      style={{
-                        margin: 0,
-                        fontSize: '0.98rem',
-                        fontWeight: 800,
-                        color: isDarkMode ? '#F8FAFC' : '#0F172A',
-                        letterSpacing: '-0.01em'
-                      }}
-                    >
-                      Field Sensor Telemetry Table
-                    </h3>
-                    <div style={{ fontSize: '0.68rem', color: '#94A3B8', fontWeight: 600 }}>
-                      Live physical telemetry vs {formatCropName(selectedCrop)} optimal requirements
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               {/* Table Header Row */}
               <div
@@ -2238,14 +2148,6 @@ const FarmAdvisor = () => {
           {/* MODULE 5: 10 FACTOR CROP SUITABILITY CARDS */}
           {activeTab === 'suitability' && (
             <div style={{ marginBottom: 16 }}>
-              {/* Section Subheader */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, paddingLeft: 4 }}>
-                <Leaf size={16} color="#15803D" strokeWidth={2.4} />
-                <span style={{ fontSize: '0.90rem', fontWeight: 800, color: isDarkMode ? '#F8FAFC' : '#0F172A' }}>
-                  Crop Suitability Alignment Analysis
-                </span>
-              </div>
-
               {/* 10 Factor Cards */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {brain.suitabilityTable.map((row, idx) => {
@@ -2381,57 +2283,6 @@ const FarmAdvisor = () => {
                 })}
               </div>
             </div>
-          )}
-
-          {/* MODULE 6: DEDICATED PEST MANAGEMENT SCREEN LINK */}
-          {(activeTab === 'sensor' || activeTab === 'suitability') && (
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={fadeUp}
-              custom={6}
-              onClick={() => navigate('/pest-management')}
-              whileTap={{ scale: 0.98 }}
-              style={{
-                background: isDarkMode ? 'var(--bg-card)' : '#FFFFFF',
-                borderRadius: 22,
-                padding: '16px 18px',
-                border: isDarkMode ? '1px solid var(--border-main)' : '1px solid rgba(16, 185, 129, 0.25)',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.03)',
-                marginBottom: 16,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 38, height: 38, borderRadius: 12, background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#15803D' }}>
-                  <Shield size={20} strokeWidth={2.4} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#10B981', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    ECO-FRIENDLY BIO-PROTECTION
-                  </div>
-                  <div style={{ fontSize: '0.96rem', fontWeight: 900, color: isDarkMode ? '#F8FAFC' : '#0F172A' }}>
-                    Integrated Pest Management (IPM)
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: isDarkMode ? '#94A3B8' : '#64748B', marginTop: 2 }}>
-                    Dedicated 4-tier scouting, monitoring & bio-spray protocol →
-                  </div>
-                </div>
-              </div>
-              <div style={{
-                width: 32, height: 32, borderRadius: 10,
-                background: isDarkMode ? 'rgba(255, 255, 255, 0.06)' : '#F1F5F9',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: isDarkMode ? '#F8FAFC' : '#0F172A',
-                flexShrink: 0
-              }}>
-                <ChevronRight size={18} strokeWidth={2.4} />
-              </div>
-            </motion.div>
           )}
 
           {/* Bottom Sheet Modal */}

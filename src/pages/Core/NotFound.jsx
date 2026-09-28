@@ -154,8 +154,6 @@ const NotFound = () => {
             <span onClick={() => navigate('/privacy-policy')} style={{ color: '#15803D', cursor: 'pointer', fontWeight: 700 }}>Privacy Policy</span>
             <span>•</span>
             <span onClick={() => navigate('/terms')} style={{ color: '#15803D', cursor: 'pointer', fontWeight: 700 }}>Terms of Service</span>
-            <span>•</span>
-            <span onClick={() => navigate('/cookie-policy')} style={{ color: '#15803D', cursor: 'pointer', fontWeight: 700 }}>Cookies</span>
           </div>
         </div>
       </motion.div>

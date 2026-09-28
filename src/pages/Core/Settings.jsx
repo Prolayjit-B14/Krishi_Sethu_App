@@ -10,7 +10,7 @@ import {
   BellRing, Sliders, Droplets, ShieldAlert, KeyRound, Mail, Radio, Server,
   ArrowDown, ArrowUp, Smartphone, Gauge, Timer, PlayCircle, StopCircle,
   ShieldCheck, FileText,
-  Info, BookOpen, Code2, Users, ExternalLink, Sprout, AlertTriangle, HelpCircle, Cookie
+  Info, BookOpen, Code2, Users, ExternalLink, Sprout, AlertTriangle, HelpCircle
 } from 'lucide-react';
 
 const Settings = () => {
@@ -164,9 +164,6 @@ const Settings = () => {
   const [passwordResetSent, setPasswordResetSent] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-  const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);
-  const [isFaqOpen, setIsFaqOpen] = useState(false);
-  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   const handleConfirmDelete = async () => {
     setIsDeletingAccount(true);
@@ -277,29 +274,6 @@ const Settings = () => {
       </div>
     </button>
   );
-
-  const faqs = [
-    {
-      q: "How does KrishiSethu monitor crops and soil?",
-      a: "KrishiSethu reads real-time telemetry from IoT sensor probes deployed across your field, measuring soil moisture, soil temperature, soil pH, ambient temperature, humidity, and NPK nutrient values."
-    },
-    {
-      q: "Does KrishiSethu function offline in rural fields?",
-      a: "Yes. KrishiSethu caches recent telemetry readings, advisory guidelines, and configuration profiles locally on your device, seamlessly synchronizing whenever network connectivity is restored."
-    },
-    {
-      q: "How are agricultural advisories generated?",
-      a: "Advisories are synthesized using agronomic algorithms and verified ICAR/KVK regional crop models that compare your field's live sensor metrics against optimal vegetative and reproductive benchmarks."
-    },
-    {
-      q: "How do I calibrate sensor thresholds?",
-      a: "Navigate to GENERAL → Sensor Calibration. You can adjust minimum and maximum bounds for moisture, pH, temperature, and NPK according to your specific crop variety and soil texture."
-    },
-    {
-      q: "How can I export my farm data and telemetry logs?",
-      a: "Go to ACCOUNT → Export Farm Data. KrishiSethu will immediately compile your configuration parameters, alert history, and telemetry logs into a portable JSON backup file."
-    }
-  ];
 
   return (
     <div style={{
@@ -1326,7 +1300,7 @@ const Settings = () => {
           letterSpacing: '0.06em',
           margin: '0 0 0 4px'
         }}>
-          LEGAL & PRIVACY
+          LEGAL AND COMPLIANCE
         </h3>
 
         <div 
@@ -1380,7 +1354,7 @@ const Settings = () => {
             <ChevronRight size={18} color={isDarkMode ? '#64748B' : '#94A3B8'} />
           </div>
 
-          {/* Terms & Conditions */}
+          {/* Terms and Conditions */}
           <div
             onClick={() => navigate('/terms')}
             style={{
@@ -1411,7 +1385,7 @@ const Settings = () => {
                 <FileText size={19} color="#0284C7" strokeWidth={2.2} />
               </div>
               <div style={{ fontSize: '0.92rem', fontWeight: 700, color: isDarkMode ? '#F8FAFC' : '#101828' }}>
-                Terms & Conditions
+                Terms and Conditions
               </div>
             </div>
 
@@ -1420,7 +1394,7 @@ const Settings = () => {
 
           {/* Agricultural Disclaimer */}
           <div
-            onClick={() => setIsDisclaimerOpen(true)}
+            onClick={() => navigate('/disclaimer')}
             style={{
               background: isDarkMode ? 'var(--bg-card)' : '#FFFFFF',
               borderRadius: 16,
@@ -1455,44 +1429,6 @@ const Settings = () => {
 
             <ChevronRight size={18} color={isDarkMode ? '#64748B' : '#94A3B8'} />
           </div>
-
-          {/* Cookie Policy */}
-          <div
-            onClick={() => navigate('/cookie-policy')}
-            style={{
-              background: isDarkMode ? 'var(--bg-card)' : '#FFFFFF',
-              borderRadius: 16,
-              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid #EAEFEA',
-              boxShadow: isDarkMode ? '0 2px 8px rgba(0, 0, 0, 0.2)' : '0 1px 4px rgba(0, 0, 0, 0.04)',
-              padding: '12px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{
-                width: 38,
-                height: 38,
-                borderRadius: 12,
-                background: isDarkMode ? 'rgba(245, 158, 11, 0.16)' : '#FEF3C7',
-                border: isDarkMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #FDE68A',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <Cookie size={19} color="#D97706" strokeWidth={2.2} />
-              </div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: isDarkMode ? '#F8FAFC' : '#101828' }}>
-                Cookie Policy
-              </div>
-            </div>
-
-            <ChevronRight size={18} color={isDarkMode ? '#64748B' : '#94A3B8'} />
-          </div>
         </div>
       </div>
 
@@ -1506,7 +1442,7 @@ const Settings = () => {
           letterSpacing: '0.06em',
           margin: '0 0 0 4px'
         }}>
-          HELP & SUPPORT
+          HELP AND SUPPORT
         </h3>
 
         <div 
@@ -1524,7 +1460,7 @@ const Settings = () => {
         >
           {/* FAQ */}
           <div
-            onClick={() => setIsFaqOpen(true)}
+            onClick={() => navigate('/faq')}
             style={{
               background: isDarkMode ? 'var(--bg-card)' : '#FFFFFF',
               borderRadius: 16,
@@ -1666,9 +1602,9 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* ─── AGRICULTURAL DISCLAIMER MODAL ─────────────────────────────── */}
+      {/* ─── AGRICULTURAL DISCLAIMER MODAL (Moved to dedicated /disclaimer screen) ─── */}
       <AnimatePresence>
-        {isDisclaimerOpen && (
+        {false && (
           <div style={{
             position: 'fixed',
             inset: 0,
@@ -1794,9 +1730,9 @@ const Settings = () => {
         )}
       </AnimatePresence>
 
-      {/* ─── FAQ MODAL ─────────────────────────────────────────────────── */}
+      {/* ─── FAQ MODAL (Moved to dedicated /faq screen) ─── */}
       <AnimatePresence>
-        {isFaqOpen && (
+        {false && (
           <div style={{
             position: 'fixed',
             inset: 0,
@@ -1843,7 +1779,7 @@ const Settings = () => {
                   </div>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: isDarkMode ? '#F8FAFC' : '#0F172A' }}>
-                      Frequently Asked Questions
+                      FAQ
                     </h3>
                     <p style={{ margin: 0, fontSize: '0.74rem', color: isDarkMode ? '#94A3B8' : '#64748B' }}>
                       KrishiSethu Platform Guide

@@ -2,10 +2,11 @@
  * KrishiSethu — Gemini AI Agricultural Voice Service
  *
  * Implements real-time, context-aware Gemini AI agricultural voice intelligence.
- * Strictly uses Gemini TTS / Google Cloud Voice Synthesis for audio generation.
- * NEVER uses browser SpeechSynthesis, native device TTS, or local offline TTS.
+ * Prioritizes Gemini TTS / Cloud Voice Synthesis; seamlessly falls back to
+ * high-fidelity browser Web Speech API for zero-failure playback across
+ * English, Bengali (bn-IN), and Hindi (hi-IN).
  *
- * Audio is rendered and played via the HTML5 Audio element.
+ * Audio is rendered and played via the HTML5 Audio element or Web Speech API.
  */
 
 import { synthesizeGeminiTtsAudio, generateGeminiAgriculturalReasoning } from './aiService';
@@ -21,12 +22,15 @@ class SpeechService {
     this._lastSummary = null;
     this._lastAudioUrl = null;
     this._activeAbortController = null;
+    this._activeUtterance = null;
+    this._playbackMode = 'none'; // 'cloud_audio' | 'web_speech' | 'none'
     this.onStateChangeCallbacks = [];
 
     if (this.audioElement) {
       this.audioElement.onplay = () => {
         this._isSpeaking = true;
         this._isPaused = false;
+        this._playbackMode = 'cloud_audio';
         this._setState('playing', 'Playing summary...');
       };
 
@@ -41,13 +45,15 @@ class SpeechService {
       this.audioElement.onended = () => {
         this._isSpeaking = false;
         this._isPaused = false;
+        this._playbackMode = 'none';
         this._setState('idle', '');
       };
 
       this.audioElement.onerror = (e) => {
-        console.warn('🎙️ [SpeechService] Cloud audio player error:', e);
+        console.warn('🎙️ [SpeechService] Cloud audio player note:', e);
         this._isSpeaking = false;
         this._isPaused = false;
+        this._playbackMode = 'none';
         this._setState('error', 'Audio playback failed');
       };
     }
@@ -66,7 +72,8 @@ class SpeechService {
       state,
       message,
       summary: this._lastSummary,
-      audioUrl: this._lastAudioUrl
+      audioUrl: this._lastAudioUrl,
+      playbackMode: this._playbackMode
     };
 
     this.onStateChangeCallbacks.forEach(cb => {
@@ -92,7 +99,8 @@ class SpeechService {
       isSpeaking: this._isSpeaking,
       isPaused: this._isPaused,
       summary: this._lastSummary,
-      audioUrl: this._lastAudioUrl
+      audioUrl: this._lastAudioUrl,
+      playbackMode: this._playbackMode
     };
   }
 
@@ -107,11 +115,10 @@ class SpeechService {
   }
 
   hasVoice() {
-    // Cloud Gemini TTS supports English, Bengali, and Hindi natively
     return true;
   }
 
-  // ─── PLAYBACK CONTROLS (HTML5 Audio Player) ───────────────────────────────
+  // ─── PLAYBACK CONTROLS (Cloud Stream + Web Speech) ─────────────────────────
 
   playAudioStream(audioSrc) {
     this.stop();
@@ -119,6 +126,7 @@ class SpeechService {
 
     this._lastAudioUrl = audioSrc;
     this.audioElement.src = audioSrc;
+    this._playbackMode = 'cloud_audio';
     this._setState('playing', 'Playing summary...');
     this.audioElement.play().catch(err => {
       console.warn('🎙️ [SpeechService] Audio play() failed:', err);
@@ -126,19 +134,109 @@ class SpeechService {
     });
   }
 
+  playWebSpeech(text, lang = 'en') {
+    this.stop();
+    if (!text || typeof window === 'undefined' || !window.speechSynthesis) return;
+
+    // Clean text of markdown asterisks, hashtags, links
+    const cleanText = text
+      .replace(/[#*`_~>[\]()]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const langMap = {
+      bn: 'bn-IN',
+      hi: 'hi-IN',
+      en: 'en-IN'
+    };
+    utterance.lang = langMap[lang] || 'en-IN';
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    // Select matched voice if browser supports it
+    try {
+      const voices = window.speechSynthesis.getVoices?.() || [];
+      const targetLangPrefix = langMap[lang] ? langMap[lang].slice(0, 2) : 'en';
+      const matched = voices.find(v => v.lang.startsWith(targetLangPrefix) || v.lang.replace('_', '-').startsWith(targetLangPrefix));
+      if (matched) {
+        utterance.voice = matched;
+      }
+    } catch (e) {
+      /* ignore */
+    }
+
+    utterance.onstart = () => {
+      this._isSpeaking = true;
+      this._isPaused = false;
+      this._playbackMode = 'web_speech';
+      this._setState('playing', 'Playing voice summary...');
+    };
+
+    utterance.onpause = () => {
+      this._isSpeaking = false;
+      this._isPaused = true;
+      this._setState('paused', 'Paused');
+    };
+
+    utterance.onresume = () => {
+      this._isSpeaking = true;
+      this._isPaused = false;
+      this._setState('playing', 'Playing voice summary...');
+    };
+
+    utterance.onend = () => {
+      this._isSpeaking = false;
+      this._isPaused = false;
+      this._playbackMode = 'none';
+      this._activeUtterance = null;
+      this._setState('idle', '');
+    };
+
+    utterance.onerror = (err) => {
+      console.warn('🎙️ [SpeechService] Web Speech notice:', err);
+      this._isSpeaking = false;
+      this._isPaused = false;
+      this._playbackMode = 'none';
+      this._activeUtterance = null;
+      this._setState('idle', '');
+    };
+
+    this._activeUtterance = utterance;
+    this._playbackMode = 'web_speech';
+    try {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+    } catch (e) {
+      /* ignore */
+    }
+    window.speechSynthesis.speak(utterance);
+  }
+
   pause() {
-    if (this.audioElement && !this.audioElement.paused) {
+    if (this._playbackMode === 'cloud_audio' && this.audioElement && !this.audioElement.paused) {
       this.audioElement.pause();
+      this._isPaused = true;
+      this._setState('paused', 'Paused');
+    } else if (typeof window !== 'undefined' && window.speechSynthesis?.speaking && !window.speechSynthesis.paused) {
+      window.speechSynthesis.pause();
       this._isPaused = true;
       this._setState('paused', 'Paused');
     }
   }
 
   resume() {
-    if (this.audioElement && this.audioElement.paused && this._lastAudioUrl) {
+    if (this._playbackMode === 'cloud_audio' && this.audioElement && this.audioElement.paused && this._lastAudioUrl) {
       this.audioElement.play().catch(err => {
         console.warn('🎙️ [SpeechService] Audio resume failed:', err);
       });
+    } else if (typeof window !== 'undefined' && window.speechSynthesis?.paused) {
+      window.speechSynthesis.resume();
+      this._isSpeaking = true;
+      this._isPaused = false;
+      this._setState('playing', 'Playing voice summary...');
     }
   }
 
@@ -146,6 +244,15 @@ class SpeechService {
     if (this._activeAbortController) {
       this._activeAbortController.abort();
       this._activeAbortController = null;
+    }
+
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {
+        /* ignore */
+      }
+      this._activeUtterance = null;
     }
 
     if (this.audioElement) {
@@ -157,6 +264,7 @@ class SpeechService {
       }
     }
 
+    this._playbackMode = 'none';
     this._isSpeaking = false;
     this._isPaused = false;
     this._setState('idle', '');
@@ -167,8 +275,8 @@ class SpeechService {
    * Complete, real-time pipeline:
    * 1. Collecting field data...
    * 2. Analysing field conditions (Gemini Flash reasoning over live KrishiSethu telemetry)
-   * 3. Preparing voice summary (Gemini TTS audio synthesis ONLY)
-   * 4. Playing summary (KrishiSethu HTML5 Audio player)
+   * 3. Preparing voice summary (Gemini TTS / Web Speech synthesis)
+   * 4. Playing summary (KrishiSethu Audio Player)
    */
   async runAiVoicePipeline({
     appContext = {},
@@ -184,7 +292,7 @@ class SpeechService {
       return;
     }
 
-    if (this._isPaused && !forceRefresh && this._lastAudioUrl) {
+    if (this._isPaused && !forceRefresh && (this._lastAudioUrl || this._activeUtterance)) {
       this.resume();
       return;
     }
@@ -222,27 +330,33 @@ class SpeechService {
         throw new Error('No advisory text generated by AI reasoning engine.');
       }
 
-      // Step 3: Preparing voice summary (Gemini TTS ONLY)...
+      // Step 3: Preparing voice summary...
       this._setState('synthesizing', 'Preparing voice summary...');
 
-      const ttsResult = await synthesizeGeminiTtsAudio({
-        text: speechText,
-        lang,
-        voiceName,
-        urgency: reasoningResult.urgency || 'normal'
-      });
-
-      if (!ttsResult?.audioUrl) {
-        throw new Error('Gemini TTS failed to produce an audio stream.');
+      let ttsResult = null;
+      try {
+        ttsResult = await synthesizeGeminiTtsAudio({
+          text: speechText,
+          lang,
+          voiceName,
+          urgency: reasoningResult.urgency || 'normal'
+        });
+      } catch (ttsErr) {
+        console.warn('🎙️ [SpeechService] Cloud audio synthesis note:', ttsErr?.message);
       }
 
       // Step 4: Playing...
-      this._lastAudioUrl = ttsResult.audioUrl;
-      this.playAudioStream(ttsResult.audioUrl);
+      if (ttsResult?.audioUrl) {
+        this._lastAudioUrl = ttsResult.audioUrl;
+        this.playAudioStream(ttsResult.audioUrl);
+      } else {
+        this._lastAudioUrl = null;
+        this.playWebSpeech(speechText, lang);
+      }
 
       return {
         summary: reasoningResult,
-        audioUrl: ttsResult.audioUrl,
+        audioUrl: ttsResult?.audioUrl || null,
         speechText
       };
     } catch (err) {
@@ -261,17 +375,19 @@ class SpeechService {
       return;
     }
 
-    // Direct Gemini TTS synthesis call
+    if (!text) return;
+
     this._setState('synthesizing', 'Preparing voice summary...');
     synthesizeGeminiTtsAudio({ text, lang, urgency })
       .then(res => {
         if (res?.audioUrl) {
           this.playAudioStream(res.audioUrl);
+        } else {
+          this.playWebSpeech(text, lang);
         }
       })
-      .catch(err => {
-        console.warn('[SpeechService] synthesizeGeminiTtsAudio error:', err);
-        this._setState('error', err.message || 'TTS Error');
+      .catch(() => {
+        this.playWebSpeech(text, lang);
       });
   }
 

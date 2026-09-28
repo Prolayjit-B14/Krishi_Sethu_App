@@ -34,7 +34,8 @@ export const MASTER_CONFIG = {
   
   // 🗺️ MAP & WEATHER (Optional External APIs)
   OPENWEATHER_API_KEY: import.meta.env.VITE_OPENWEATHER_API_KEY || "", 
-  GEMINI_API_KEY: import.meta.env.VITE_GEMINI_API_KEY || (typeof localStorage !== 'undefined' ? localStorage.getItem('krishisethu_gemini_api_key') : '') || "", 
+  GEMINI_API_KEY: import.meta.env.VITE_GEMINI_API_KEY || (typeof localStorage !== 'undefined' ? localStorage.getItem('krishisethu_gemini_api_key') : '') || "",
+
   AI_PROXY_URL: import.meta.env.VITE_AI_PROXY_URL || "", // Optional backend proxy (Firebase Function / Express / Worker)
   WEATHER_CITY: import.meta.env.VITE_WEATHER_CITY || "",
   

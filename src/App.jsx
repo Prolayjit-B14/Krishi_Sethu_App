@@ -12,8 +12,9 @@ import {
   LayoutGrid, LineChart, Cpu,
   Camera, Bell, User, Leaf,
   Settings as SettingsIcon, FlaskConical, Sparkles,
-  AlertCircle, AlertTriangle
+  AlertCircle, AlertTriangle, Bot, Droplets
 } from 'lucide-react';
+
 import { TelemetryProvider } from './state/TelemetryContext';
 
 // Context & State
@@ -22,7 +23,6 @@ import { AppProvider, useApp } from './state/AppContext';
 // Reusable Components
 import TopBar from './ui/TopBar';
 import Sidebar from './ui/Sidebar';
-import AgriBot from './ui/AgriBot';
 
 // 🚀 PERFORMANCE: Lazy load pages to prevent white-screen on startup
 import Login from './pages/Auth/Login';
@@ -30,6 +30,7 @@ import Splash from './pages/Auth/Splash';
 // 🚀 PERFORMANCE: Lazy load pages
 const Account = React.lazy(() => import('./pages/Auth/Account'));
 const Dashboard = React.lazy(() => import('./pages/Core/Dashboard'));
+const KrishiSethuAI = React.lazy(() => import('./pages/AI/KrishiSethuAI'));
 const AlertCenter = React.lazy(() => import('./pages/Core/AlertCenter'));
 const NotificationDetail = React.lazy(() => import('./pages/Core/NotificationDetail'));
 const Settings = React.lazy(() => import('./pages/Core/Settings'));
@@ -46,14 +47,14 @@ const FarmAdvisor = React.lazy(() => import('./pages/Advisory/FarmAdvisor'));
 const ActuatorControl = React.lazy(() => import('./pages/Control/ActuatorControl'));
 const IrrigationControl = React.lazy(() => import('./pages/Control/IrrigationControl'));
 const FarmSetup = React.lazy(() => import('./pages/Auth/FarmSetup'));
-const PestManagement = React.lazy(() => import('./pages/Advisory/PestManagement'));
-const YieldWaterAnalytics = React.lazy(() => import('./pages/Analytics/YieldWaterAnalytics'));
-const ClimateRiskRadar = React.lazy(() => import('./pages/Monitoring/ClimateRiskRadar'));
 
-// 📜 LEGAL & COMPLIANCE PAGES (India DPDP Act 2023 & Disclaimers)
+
+
+// 📜 DEDICATED LEGAL, COMPLIANCE & FAQ SCREENS
 const PrivacyPolicy = React.lazy(() => import('./pages/Legal/PrivacyPolicy'));
 const TermsConditions = React.lazy(() => import('./pages/Legal/TermsConditions'));
-const CookiePolicy = React.lazy(() => import('./pages/Legal/CookiePolicy'));
+const AgriculturalDisclaimer = React.lazy(() => import('./pages/Legal/AgriculturalDisclaimer'));
+const FAQ = React.lazy(() => import('./pages/Legal/FAQ'));
 const NotFound = React.lazy(() => import('./pages/Core/NotFound'));
 
 // 📖 ABOUT & CONTACT DEDICATED PAGES
@@ -96,6 +97,14 @@ const BottomNav = React.memo(() => {
       matches: ['/soil-monitoring', '/sensor-detail', '/sensor-details-screen', '/sensor-details', '/sensor-manager', '/sensors', '/precision-soil-testing']
     },
     {
+      id: 'Krishi AI',
+      label: 'Krishi AI',
+      path: '/krishisethu-ai',
+      icon: Bot,
+      color: '#10B981',
+      matches: ['/krishisethu-ai', '/ai', '/agribot']
+    },
+    {
       id: 'Advisor',
       path: '/crop-advisor',
       icon: Sparkles,
@@ -103,19 +112,13 @@ const BottomNav = React.memo(() => {
       matches: ['/crop-advisor']
     },
     {
-      id: 'Analytics',
-      path: '/reports',
-      icon: LineChart,
-      color: 'var(--primary)',
-      matches: ['/reports', '/analytics', '/alerts', '/notification-detail']
+      id: 'Irrigation',
+      path: '/irrigation',
+      icon: Droplets,
+      color: '#0284C7',
+      matches: ['/irrigation', '/irrigation-control']
     },
-    {
-      id: 'Devices',
-      path: '/device-area',
-      icon: Cpu,
-      color: '#176B45',
-      matches: ['/device-area', '/device-detail', '/device-details', '/actuators']
-    },
+
   ];
 
   return (
@@ -154,9 +157,9 @@ const BottomNav = React.memo(() => {
             </motion.div>
             <motion.span
               animate={{ opacity: isActive ? 1 : 0.6, y: isActive ? 0 : 2 }}
-              style={{ fontSize: '0.65rem', fontWeight: isActive ? 800 : 600, letterSpacing: '0.02em' }}
+              style={{ fontSize: '0.62rem', fontWeight: isActive ? 800 : 600, letterSpacing: '0.01em', whiteSpace: 'nowrap' }}
             >
-              {item.id}
+              {item.label || item.id}
             </motion.span>
           </motion.button>
         );
@@ -211,16 +214,19 @@ const MainLayout = ({ children }) => {
     '/sensor-manager': 'Sensor Manager',
     '/sensors': 'Sensor Manager',
     '/weather': 'Weather Station',
-    '/climate-risk-radar': 'Climate & Disaster Radar',
-    '/disaster-radar': 'Climate & Disaster Radar',
+
     '/device-area': 'Device Manager',
     '/device-detail': 'Device Details',
     '/device-details': 'Device Details',
     '/actuators': 'Actuator Control',
     '/irrigation': 'Irrigation Control',
     '/irrigation-control': 'Irrigation Control',
-    '/precision-soil-testing': 'Soil Forensics',
+    '/precision-soil-testing': 'Soil Test',
+
     '/crop-advisor': 'Farm Advisor',
+    '/krishisethu-ai': 'Krishi AI',
+    '/ai': 'Krishi AI',
+    '/agribot': 'Krishi AI',
     '/farm-setup': 'Farm Setup',
     '/reports': 'Farm Reports',
     '/analytics': 'Analytics Hub',
@@ -230,9 +236,14 @@ const MainLayout = ({ children }) => {
     '/profile': 'My Account',
     '/settings': 'Settings',
     '/privacy-policy': 'Privacy Policy',
-    '/terms': 'Terms & Conditions',
-    '/cookie-policy': 'Cookie Policy',
-    '/cookies': 'Cookie Policy',
+    '/privacy': 'Privacy Policy',
+    '/terms': 'Terms and Conditions',
+    '/terms-conditions': 'Terms and Conditions',
+    '/terms-of-service': 'Terms and Conditions',
+    '/disclaimer': 'Agricultural Disclaimer',
+    '/agricultural-disclaimer': 'Agricultural Disclaimer',
+    '/faq': 'FAQ',
+    '/faqs': 'FAQ',
     '/about-us': 'About Us',
     '/about': 'About Us',
     '/about-krishisethu': 'About Us',
@@ -256,6 +267,7 @@ const MainLayout = ({ children }) => {
       '/dashboard',
       '/precision-soil-testing',
       '/crop-advisor',
+      '/krishisethu-ai',
       '/analytics',
       '/device-area',
       '/soil-monitoring',
@@ -301,6 +313,8 @@ const MainLayout = ({ children }) => {
     })
   };
 
+  const isChatScreen = ['/krishisethu-ai', '/ai', '/agribot'].includes(location.pathname);
+
   return (
     <div style={{
       height: '100dvh',
@@ -315,18 +329,25 @@ const MainLayout = ({ children }) => {
         ref={mainRef}
         style={{
           flex: 1,
-          overflowY: 'auto',
+          overflowY: isChatScreen ? 'hidden' : 'auto',
           overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
-          position: 'relative'
+          position: 'relative',
+          display: isChatScreen ? 'flex' : 'block',
+          flexDirection: 'column',
+          marginBottom: isChatScreen ? '66px' : '0px'
         }}
       >
         <div style={{
           maxWidth: '480px',
           margin: '0 auto',
           width: '100%',
+          height: isChatScreen ? '100%' : 'auto',
           boxSizing: 'border-box',
-          paddingBottom: '84px'
+          paddingBottom: isChatScreen ? '0px' : '84px',
+          display: isChatScreen ? 'flex' : 'block',
+          flexDirection: 'column',
+          flex: isChatScreen ? 1 : 'none'
         }}>
           <AnimatePresence mode="wait">
             <motion.div
@@ -335,7 +356,14 @@ const MainLayout = ({ children }) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
-              style={{ width: '100%', boxSizing: 'border-box' }}
+              style={{
+                width: '100%',
+                height: isChatScreen ? '100%' : 'auto',
+                boxSizing: 'border-box',
+                display: isChatScreen ? 'flex' : 'block',
+                flexDirection: 'column',
+                flex: isChatScreen ? 1 : 'none'
+              }}
             >
               {children}
             </motion.div>
@@ -344,7 +372,6 @@ const MainLayout = ({ children }) => {
       </main>
       <BottomNav />
       <Sidebar />
-      {location.pathname === '/dashboard' && <AgriBot />}
     </div>
   );
 };
@@ -440,6 +467,9 @@ const AppRoutes = () => {
       {/* 🛠️ PERSISTENT LAYOUT WRAPPER: Prevents layout re-mounting on every navigation */}
       <Route element={<MainLayout><React.Suspense fallback={<PageLoader />}><Outlet /></React.Suspense></MainLayout>}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/krishisethu-ai" element={<KrishiSethuAI />} />
+        <Route path="/ai" element={<Navigate to="/krishisethu-ai" replace />} />
+        <Route path="/agribot" element={<Navigate to="/krishisethu-ai" replace />} />
         <Route path="/analytics" element={<AnalyticsHub />} />
         <Route path="/soil-monitoring" element={<SoilMonitor />} />
         <Route path="/sensor-detail" element={<SensorDetails />} />
@@ -456,15 +486,14 @@ const AppRoutes = () => {
         <Route path="/account" element={<Account />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/weather" element={<WeatherMonitor />} />
-        <Route path="/climate-risk-radar" element={<ClimateRiskRadar />} />
-        <Route path="/disaster-radar" element={<ClimateRiskRadar />} />
+
         <Route path="/precision-soil-testing" element={<SoilForensics />} />
         <Route path="/crop-advisor" element={<FarmAdvisor />} />
-        <Route path="/pest-management" element={<PestManagement />} />
-        <Route path="/pest-analysis" element={<PestManagement />} />
-        <Route path="/yield-water-analytics" element={<YieldWaterAnalytics />} />
-        <Route path="/yield-forecast" element={<YieldWaterAnalytics />} />
-        <Route path="/water-conservation" element={<YieldWaterAnalytics />} />
+        <Route path="/pest-management" element={<Navigate to="/crop-advisor" replace />} />
+        <Route path="/pest-analysis" element={<Navigate to="/crop-advisor" replace />} />
+        <Route path="/yield-water-analytics" element={<Navigate to="/analytics" replace />} />
+        <Route path="/yield-forecast" element={<Navigate to="/analytics" replace />} />
+        <Route path="/water-conservation" element={<Navigate to="/analytics" replace />} />
         <Route path="/actuators" element={<ActuatorControl />} />
         <Route path="/irrigation" element={<IrrigationControl />} />
         <Route path="/irrigation-control" element={<IrrigationControl />} />
@@ -476,11 +505,18 @@ const AppRoutes = () => {
         <Route path="/crop-vision" element={<Navigate to="/crop-advisor" replace />} />
         <Route path="/vision" element={<Navigate to="/crop-advisor" replace />} />
         <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
-        {/* 📜 LEGAL & COMPLIANCE (inside app shell) */}
+        {/* 📜 DEDICATED LEGAL, COMPLIANCE & FAQ SCREENS */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
         <Route path="/terms" element={<TermsConditions />} />
-        <Route path="/cookie-policy" element={<CookiePolicy />} />
-        <Route path="/cookies" element={<Navigate to="/cookie-policy" replace />} />
+        <Route path="/terms-conditions" element={<Navigate to="/terms" replace />} />
+        <Route path="/terms-of-service" element={<Navigate to="/terms" replace />} />
+        <Route path="/disclaimer" element={<AgriculturalDisclaimer />} />
+        <Route path="/agricultural-disclaimer" element={<Navigate to="/disclaimer" replace />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/faqs" element={<Navigate to="/faq" replace />} />
+        <Route path="/cookie-policy" element={<Navigate to="/privacy-policy" replace />} />
+        <Route path="/cookies" element={<Navigate to="/privacy-policy" replace />} />
         <Route path="/refund-policy" element={<Navigate to="/terms" replace />} />
         {/* 📖 ABOUT & CONTACT (inside app shell) */}
         <Route path="/about-us" element={<AboutKrishiSethu />} />
